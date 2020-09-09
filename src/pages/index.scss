@@ -1,0 +1,186 @@
+/***********************
+ * BOOTSTRAP OVERRIDES *
+ ***********************/
+$font-family-sans-serif: "Poppins";
+
+$primary: rgb(255, 30, 60);
+
+$input-border-width: 0;
+$input-border-radius: 0;
+$input-focus-box-shadow: none;
+
+$rounded-pill: 0.5rem;
+
+/************************
+ * BOOTSTRAP COMPONENTS *
+ ************************/
+
+@import "~bootstrap/scss/_functions";
+@import "~bootstrap/scss/_variables";
+@import "~bootstrap/scss/_mixins";
+@import "~bootstrap/scss/_root";
+@import "~bootstrap/scss/_reboot";
+@import "~bootstrap/scss/_type";
+@import "~bootstrap/scss/_grid";
+@import "~bootstrap/scss/_tables";
+@import "~bootstrap/scss/_forms";
+@import "~bootstrap/scss/_buttons";
+@import "~bootstrap/scss/_transitions";
+@import "~bootstrap/scss/_button-group";
+@import "~bootstrap/scss/_nav";
+@import "~bootstrap/scss/_card";
+@import "~bootstrap/scss/_close";
+@import "~bootstrap/scss/_modal";
+@import "~bootstrap/scss/_utilities";
+
+/**************
+ * CUSTOM CSS *
+ **************/
+
+$bg-gray: rgb(233, 233, 233);
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+.form-control {
+  border-bottom: 1px solid $input-border-color;
+  &:focus {
+    border-bottom: 1px solid $input-focus-border-color;
+  }
+}
+
+.login {
+  background: $bg-gray;
+  
+  &:before {
+    content: "";
+    position: absolute;
+    background: $primary;
+    display: block;
+    height: 58%;
+    top: 0;
+    left: 0;
+    right: 0;
+    transform: skewY(-7deg);
+    transform-origin: 0 100%;
+  }
+}
+
+.login-card {
+  height: 30em;
+  width: 45em;
+}
+
+.venue-brand:after {
+  display: block;
+  position: absolute;
+  height: 10px;
+  width: 10px;
+  background: red;
+}
+
+.venue-logo {
+  height: 64px;
+  width: 64px;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 50%;
+  background-size: contain;
+}
+
+.nav-link .svg-inline--fa {
+  margin-right: 1rem;
+}
+
+.col-main {
+  background-color: $bg-gray;
+  overflow: scroll;
+  &:before {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 350px;
+    background: $primary;
+    transform: skewY(-6deg);
+    transform-origin: 0 100%;
+  }
+}
+
+table.cards {
+  border-collapse: separate;
+  border-spacing: 1em;
+  border: 1em solid transparent;
+  border-top: 0;
+  background-color: $white;
+
+  tbody {
+    td {
+      position: relative;
+      vertical-align: middle;
+      &:nth-child(1) {
+        &:after {
+          content: "";
+          position: absolute;
+          display: block;
+          top: 25%;
+          right: 25px;
+          height: 50%;
+          width: $border-width;
+          background-color: $gray-400;
+        }
+      }
+    }
+  }
+}
+
+// Utilities
+.btn-primary.btn-primary-focus-none:focus,
+.btn-primary.btn-primary-active-none:active {
+  outline: none;
+  box-shadow: none;
+  border-color: $primary !important;
+  background-color: $primary !important;
+}
+
+.btn-primary.btn-primary-hover-none:hover {
+  border-color: $primary;
+  background-color: $primary;
+}
+
+.text-height-lg {
+  line-height: #{2 * $font-size-lg} !important;
+}
+
+.text-lg {
+  font-size: $font-size-lg !important;
+}
+
+.mb-3 {
+  padding-bottom: 3%;
+}
+
+.mt-4 {
+  padding-top: 3%;
+}
+
+.shadow {
+  box-shadow: 0 0rem 0.8rem 0.2rem rgba(0, 0, 0, 0.1) !important;
+}
+
+// Toast
+@import "~react-toastify/scss/main.scss";
+
+.Toastify__toast-container {
+  max-width: 200px;
+}
+.Toastify__toast {
+  min-height: auto;
+  font-size: $font-size-sm;
+  border-radius: $border-radius;
+}
