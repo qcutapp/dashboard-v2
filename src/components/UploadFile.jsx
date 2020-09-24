@@ -77,15 +77,14 @@ export default function UploadFile({ initialUrl, onUpload }) {
             className="img-preview"
             style={{ backgroundImage: `url(${uploadUrl})` }}
           ></div>
-          <a
-            href="#"
+          <div
+            className="btn btn-link"
             onClick={(e) => {
-              e.preventDefault();
               setUploadUrl(null);
             }}
           >
             Remove
-          </a>
+          </div>
         </>
       )}
     </div>

@@ -138,6 +138,7 @@ export default function Menu() {
               setMenus((prevMenus) =>
                 prevMenus.filter((m) => m._id !== modifyMenu._id)
               );
+              break;
             default:
               break;
           }
@@ -320,7 +321,7 @@ function SpecialSelector({ initialSpecials, onChange }) {
 
   useEffect(() => {
     onChange(selectedSpecials);
-  }, [selectedSpecials]);
+  }, [selectedSpecials, onChange]);
 
   return [...selectedSpecials, ""].map((specialId, i) => (
     <div className="row" key={i}>
@@ -356,20 +357,18 @@ function SpecialSelector({ initialSpecials, onChange }) {
           </>
         )}
       </div>
-      <div className="col-3 d-flex align-items-center justify-content-center">
+      <div className="col-3 d-flex align-items-center">
         {specialId && (
-          <a
+          <div
             className="btn btn-link"
-            href="#"
             onClick={(e) => {
-              e.preventDefault();
               setSelectedSpecials((prevSelectedSpecials) =>
                 prevSelectedSpecials.filter((_id) => _id !== specialId)
               );
             }}
           >
             Remove
-          </a>
+          </div>
         )}
       </div>
     </div>
@@ -385,7 +384,7 @@ function DrinkSelector({ initialDrinks, onChange }) {
 
   useEffect(() => {
     onChange(selectedDrinks);
-  }, [selectedDrinks]);
+  }, [selectedDrinks, onChange]);
 
   return [...selectedDrinks, ""].map((drinkId, i) => (
     <div className="row" key={i}>

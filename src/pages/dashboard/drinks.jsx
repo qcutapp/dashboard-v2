@@ -74,13 +74,19 @@ export default function Drinks() {
 
   // Category icons
   const categoryIcons = {
-    Spirits: process.env.PUBLIC_URL + "/drinks/Grey-Spirit-Icon.png",
-    Cocktails: process.env.PUBLIC_URL + "/drinks/Grey-Cocktail-Icon.png",
-    Wines: process.env.PUBLIC_URL + "/drinks/Grey-Wine-Icon.png",
-    "Soft Drinks": process.env.PUBLIC_URL + "/drinks/Grey-SoftDrink-Icon.png",
-    "Beers & Bottles": process.env.PUBLIC_URL + "/drinks/Grey-Bottle-Icon.png",
-    Shots: process.env.PUBLIC_URL + "/drinks/Grey-Shots-Icon.png",
-    default: process.env.PUBLIC_URL + "/drinks/Grey-Shots-Icon.png",
+    Shots: process.env.PUBLIC_URL + "/drinks/Grey-Shots-Icon.svg",
+    Spirits: process.env.PUBLIC_URL + "/drinks/Grey-Spirit-Icon.svg",
+    Cocktails: process.env.PUBLIC_URL + "/drinks/Grey-Cocktail-Icon.svg",
+    Wines: process.env.PUBLIC_URL + "/drinks/Grey-Wine-Icon.svg",
+    Beers: process.env.PUBLIC_URL + "/drinks/Grey-beer-Icon.svg",
+    Ciders: process.env.PUBLIC_URL + "/drinks/Grey-Cider-Icon.svg",
+    "Soft Drinks": process.env.PUBLIC_URL + "/drinks/Grey-SoftDrink-Icon.svg",
+    "Hot Drinks": process.env.PUBLIC_URL + "/drinks/Grey-Hot-Icon.svg",
+    Sparkling: process.env.PUBLIC_URL + "/drinks/Grey-Sparkling-Icon.svg",
+    Bottles: process.env.PUBLIC_URL + "/drinks/Grey-Bottles-Icon.svg",
+    Alcopops: process.env.PUBLIC_URL + "/drinks/Grey-Alcopops-Icon.svg",
+    Liquers: process.env.PUBLIC_URL + "/drinks/Grey-Liquors-Icon.svg",
+    default: process.env.PUBLIC_URL + "/drinks/Grey-Shots-Icon.svg",
   };
 
   return (
@@ -360,6 +366,11 @@ function AddOrUpdateDrinkModal({ drink, show, onHide, onSuccess }) {
     <Modal show={show} onHide={onHide}>
       <Modal.Header className="bg-light" closeButton>
         <Modal.Title className="text-muted">
+          {category && !drink && (
+            <div className="btn mr-2" onClick={() => setCategory("")}>
+              &#x3C;
+            </div>
+          )}
           {drink ? "Update Drink" : "Add Drink"}
         </Modal.Title>
       </Modal.Header>

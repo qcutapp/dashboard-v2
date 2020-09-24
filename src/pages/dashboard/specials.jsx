@@ -101,7 +101,7 @@ export default function Specials() {
                 <tr>
                   <td className="text-muted">Name</td>
                   <td className="text-muted">Description</td>
-                  <td className="text-muted">Total Drinks</td>
+                  <td className="text-muted">Total Options</td>
                   <td className="text-muted">Type</td>
                   <td className="text-muted">Price</td>
                 </tr>
@@ -116,7 +116,7 @@ export default function Specials() {
                   >
                     <td>{special.name}</td>
                     <td>{special.description}</td>
-                    <td>{special.drinks.length}</td>
+                    <td>{special.optionsQuantity || 0}</td>
                     <td>{special.type}</td>
                     <td>£{special.price}</td>
                   </tr>
@@ -163,12 +163,12 @@ export default function Specials() {
               break;
           }
 
-          setAddSpecial(false);
           setModifySpecial(null);
+          setAddSpecial(false);
         }}
         onHide={() => {
-          setAddSpecial(false);
           setModifySpecial(null);
+          setAddSpecial(false);
         }}
       />
     </div>
@@ -180,7 +180,8 @@ function AddOrUpdateSpecial({ show, special, onSuccess, onHide }) {
   const [type, setType] = useState("");
   const [price, setPrice] = useState("");
   const [image, setImage] = useState(null);
-  const [drinks, setDrinks] = useState([]);
+  const [optionsQuantity, setOptionsQuantity] = useState("");
+  const [options, setOptions] = useState([]);
   const [description, setDescription] = useState("");
   const { appState } = useContext(AppStore);
 
@@ -189,7 +190,8 @@ function AddOrUpdateSpecial({ show, special, onSuccess, onHide }) {
     setType(special?.type || "");
     setPrice(special?.price || "");
     setImage(special?.image || null);
-    setDrinks(special?.drinks || []);
+    setOptionsQuantity(special?.optionsQuantity || "");
+    setOptions(special?.options || []);
     setDescription(special?.description || "");
   }, [special]);
 
@@ -201,7 +203,7 @@ function AddOrUpdateSpecial({ show, special, onSuccess, onHide }) {
         // Add Request
         request = axios.post(
           `${process.env.REACT_APP_API_ENDPOINT}/venue/special`,
-          { name, type, price, image, drinks, description },
+          { name, type, price, image, optionsQuantity, options, description },
           {
             headers: { authorization: `Bearer ${appState.user.access_token}` },
           }
@@ -211,7 +213,7 @@ function AddOrUpdateSpecial({ show, special, onSuccess, onHide }) {
         // Update Request
         request = axios.patch(
           `${process.env.REACT_APP_API_ENDPOINT}/venue/special/${special._id}`,
-          { name, type, price, image, drinks, description },
+          { name, type, price, image, optionsQuantity, options, description },
           {
             headers: { authorization: `Bearer ${appState.user.access_token}` },
           }
@@ -306,15 +308,29 @@ function AddOrUpdateSpecial({ show, special, onSuccess, onHide }) {
             </div>
           </div>
           {type === "option" && (
-            <div className="row my-4">
-              <div className="col">
-                <label>Drinks</label>
-                <DrinksSelector
-                  initialDrinks={drinks}
-                  onChange={(drinks) => setDrinks(drinks)}
-                />
+            <>
+              <div className="row my-4">
+                <div className="col">
+                  <label>Options Quantity</label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    placeholder="Quantity"
+                    value={optionsQuantity}
+                    onChange={(e) => setOptionsQuantity(e.target.value)}
+                  />
+                </div>
               </div>
-            </div>
+              <div className="row my-4">
+                <div className="col">
+                  <label>Options</label>
+                  <OptionsSelector
+                    initialOptions={options}
+                    onChange={(options) => setOptions(options)}
+                  />
+                </div>
+              </div>
+            </>
           )}
           <div className="row my-4">
             <div className="col">
@@ -363,37 +379,29 @@ function AddOrUpdateSpecial({ show, special, onSuccess, onHide }) {
   );
 }
 
-function DrinksSelector({ initialDrinks, onChange }) {
-  const [selectedDrinks, setSelectedDrinks] = useState(initialDrinks);
+function OptionsSelector({ initialOptions, onChange }) {
+  const [selectedOptions, setSelectedOptions] = useState(initialOptions);
 
   useEffect(() => {
-    onChange(selectedDrinks);
-  }, [selectedDrinks]);
+    onChange(selectedOptions);
+  }, [selectedOptions, onChange]);
 
   const {
     appState: { venue },
   } = useContext(AppStore);
 
-  return [...selectedDrinks, {}].map((drinkObj, i) => (
+  return [...selectedOptions, ""].map((drinkId, i) => (
     <div className="row" key={i}>
-      <div className="col-5">
+      <div className="col-8">
         <select
           className="form-control"
-          value={drinkObj.drink?._id || drinkObj.drink || ""}
+          value={drinkId || ""}
           onChange={(e) => {
             const value = e.target.value;
 
-            setSelectedDrinks((prevSelectedDrinks) => {
-              const newSelectedDrinks = [...prevSelectedDrinks];
-
-              if (typeof newSelectedDrinks[i] === "undefined") {
-                newSelectedDrinks[i] = {
-                  drink: value,
-                  quantity: 1,
-                };
-              } else {
-                newSelectedDrinks[i]["drink"] = value;
-              }
+            setSelectedOptions((prevSelectedOptions) => {
+              const newSelectedDrinks = [...prevSelectedOptions];
+              newSelectedDrinks[i] = value;
 
               return newSelectedDrinks;
             });
@@ -407,31 +415,13 @@ function DrinksSelector({ initialDrinks, onChange }) {
           ))}
         </select>
       </div>
-      <div className="col-4">
-        <input
-          type="text"
-          className="form-control mx-2"
-          placeholder="Quantity"
-          value={drinkObj.quantity || "Quantity"}
-          onChange={(e) => {
-            const value = e.target.value;
-
-            setSelectedDrinks((prevSelectedDrinks) => {
-              const newSelectedDrinks = [...prevSelectedDrinks];
-              newSelectedDrinks[i]["quantity"] = value;
-              return newSelectedDrinks;
-            });
-          }}
-          disabled={!drinkObj.drink}
-        />
-      </div>
-      <div className="col-3 d-flex align-items-end">
-        {drinkObj.drink && Object.keys(drinkObj).length !== 0 && (
+      <div className="col-4 d-flex align-items-end">
+        {drinkId && (
           <div
             className="btn btn-link"
             onClick={() =>
-              setSelectedDrinks((prevSelectedDrinks) =>
-                prevSelectedDrinks.filter((l) => l.drink !== drinkObj.drink)
+              setSelectedOptions((prevSelectedOptions) =>
+                prevSelectedOptions.filter((_id) => _id !== drinkId)
               )
             }
           >
