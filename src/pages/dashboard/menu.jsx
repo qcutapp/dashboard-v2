@@ -1,184 +1,67 @@
-import React, { useState, useContext, useEffect } from "react";
-import Modal from "react-bootstrap/Modal";
-import { toast } from "react-toastify";
-import PropTypes from "prop-types";
+import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
+import { toast } from "react-toastify";
+import Modal from "react-bootstrap/Modal";
 
 import { AppStore } from "store";
 
 export default function Menu() {
-  const [drinks, setDrinks] = useState([]);
-  const [addDrink, setAddDrink] = useState(false);
-  const [modifyDrink, setModifyDrink] = useState(null);
-  const [isModalVisible, setModalVisible] = useState(false);
-  const [filter, setFilter] = useState({
-    category: [],
-    search: "",
-  });
+  const [menus, setMenus] = useState([]);
+  const [addMenu, setAddMenu] = useState(false);
+  const [modifyMenu, setModifyMenu] = useState(null);
 
-  // App state
   const {
-    appState: { venue, user },
+    appState: { user },
   } = useContext(AppStore);
 
-  // Show Modal
-  useEffect(() => {
-    if (addDrink || modifyDrink) {
-      setModalVisible(true);
-    }
-  }, [addDrink, modifyDrink]);
-
-  // Hide Modal
-  useEffect(() => {
-    if (!isModalVisible) {
-      if (addDrink) setAddDrink(false);
-      if (modifyDrink) setModifyDrink(null);
-    }
-  }, [isModalVisible]); // !BUG: Adding addDrink, modifyDrink in dependencies breaks the Update modal.
-
-  // Get drinks
+  // fetch: menus
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_API_ENDPOINT}/venue/${venue._id}/menu`, {
+      .get(`${process.env.REACT_APP_API_ENDPOINT}/menu`, {
         headers: { authorization: `Bearer ${user.access_token}` },
       })
       .then((response) => {
-        setDrinks(response.data);
+        setMenus(response.data);
       })
       .catch((err) => {
         toast.error(err.response?.data?.message || err.message);
       });
-  }, [venue, user]);
+  }, [user]);
 
-  // Filter drinks
-  let filteredDrinks = drinks
-    .filter((drink) => !drink.deleted)
-    .filter((drink) => {
-      if (!filter.category.length && !filter.search) return true;
-
-      if (filter.category.length && filter.category.includes(drink.category)) {
-        return true;
-      }
-
-      if (
-        filter.search &&
-        drink.name.toLowerCase().includes(filter.search.toLowerCase())
-      ) {
-        return true;
-      }
-
-      return false;
-    });
-
-  // Sort drinks
-  filteredDrinks.sort((a, b) => (a.updatedAt > b.updatedAt ? -1 : 1));
-
-  // Category icons
-  const categoryIcons = {
-    Spirits: process.env.PUBLIC_URL + "/drinks/Grey-Spirit-Icon.png",
-    Cocktails: process.env.PUBLIC_URL + "/drinks/Grey-Cocktail-Icon.png",
-    Wines: process.env.PUBLIC_URL + "/drinks/Grey-Wine-Icon.png",
-    "Soft Drinks": process.env.PUBLIC_URL + "/drinks/Grey-SoftDrink-Icon.png",
-    "Beers & Bottles": process.env.PUBLIC_URL + "/drinks/Grey-Bottle-Icon.png",
-    Shots: process.env.PUBLIC_URL + "/drinks/Grey-Shots-Icon.png",
-    default: process.env.PUBLIC_URL + "/drinks/Grey-Shots-Icon.png",
+  const activateMenu = (menuId) => {
+    axios
+      .patch(
+        `${process.env.REACT_APP_API_ENDPOINT}/menu/${menuId}/activate`,
+        {},
+        {
+          headers: { authorization: `Bearer ${user.access_token}` },
+        }
+      )
+      .then((response) => {
+        setMenus(response.data);
+      })
+      .catch((err) => {
+        toast.error(err.response?.data?.message || err.message);
+      });
   };
 
   return (
-    <div className="container container-menu">
+    <div className="container">
       <div className="row mt-3 mb-5">
         <div className="col-sm">
-          <h1 className="text-light text-weight-bold">Your Menu</h1>
+          <h1 className="text-light text-weight-bold">Your Menus</h1>
         </div>
         <div className="col-sm text-right">
           <div
             className="btn btn-primary btn-primary-hover-none btn-lg"
-            onClick={() => setAddDrink(true)}
+            onClick={() => setAddMenu(true)}
           >
-            Add Item
+            Add Menu
             <img
               src={process.env.PUBLIC_URL + "/add-icon.png"}
-              alt="Add Item"
+              alt="Add Menu"
               style={{ marginLeft: "1rem", width: "24px" }}
             />
-          </div>
-        </div>
-      </div>
-      <div className="row">
-        <div className="col-sm">
-          <div className="btn-group btn-group-sm w-100" role="group">
-            <button
-              type="button"
-              className={`btn btn-primary btn-primary-hover-none btn-primary-focus-none btn-primary-active-none text-height-lg ${
-                !filter.category.length && "font-weight-bold text-lg"
-              }`}
-              onClick={() => setFilter({ search: "", category: [] })}
-            >
-              All
-            </button>
-            <button
-              type="button"
-              className={`btn btn-primary btn-primary-hover-none btn-primary-focus-none btn-primary-active-none text-height-lg ${
-                filter.category.includes("Soft Drinks") &&
-                "font-weight-bold text-lg"
-              }`}
-              onClick={() =>
-                setFilter({ search: "", category: ["Soft Drinks"] })
-              }
-            >
-              Soft Drinks
-            </button>
-            <button
-              type="button"
-              className={`btn btn-primary btn-primary-hover-none btn-primary-focus-none btn-primary-active-none text-height-lg ${
-                filter.category.includes("Spirits") &&
-                "font-weight-bold text-lg"
-              }`}
-              onClick={() => setFilter({ search: "", category: ["Spirits"] })}
-            >
-              Spirits
-            </button>
-            <button
-              type="button"
-              className={`btn btn-primary btn-primary-hover-none btn-primary-focus-none btn-primary-active-none text-height-lg ${
-                filter.category.includes("Shots") && "font-weight-bold text-lg"
-              }`}
-              onClick={() => setFilter({ search: "", category: ["Shots"] })}
-            >
-              Shots
-            </button>
-            <button
-              type="button"
-              className={`btn btn-primary btn-primary-hover-none btn-primary-focus-none btn-primary-active-none text-height-lg ${
-                (filter.category.includes("Beers") ||
-                  filter.category.includes("Bottles")) &&
-                "font-weight-bold text-lg"
-              }`}
-              onClick={() =>
-                setFilter({ search: "", category: ["Beers", "Bottles"] })
-              }
-            >
-              Beers & Bottles
-            </button>
-            <button
-              type="button"
-              className={`btn btn-primary btn-primary-hover-none btn-primary-focus-none btn-primary-active-none text-height-lg ${
-                filter.category.includes("Cocktails") &&
-                "font-weight-bold text-lg"
-              }`}
-              onClick={() => setFilter({ search: "", category: ["Cocktails"] })}
-            >
-              Cocktails
-            </button>
-            <button
-              type="button"
-              className={`btn btn-primary btn-primary-hover-none btn-primary-focus-none btn-primary-active-none text-height-lg ${
-                filter.category.includes("Wines") && "font-weight-bold text-lg"
-              }`}
-              onClick={() => setFilter({ search: "", category: ["Wines"] })}
-            >
-              Wines
-            </button>
           </div>
         </div>
       </div>
@@ -188,68 +71,41 @@ export default function Menu() {
             <table className="table table-borderless rounded-pill cards">
               <thead>
                 <tr>
-                  <td colSpan="3" style={{ verticalAlign: "bottom" }}>
-                    {filteredDrinks.length} Items Showing
-                    {Object.keys(filter).some((i) => filter[i].length) && (
-                      <button
-                        type="button"
-                        className="btn btn-link"
-                        onClick={() => setFilter({ search: "", category: [] })}
-                      >
-                        Reset filters
-                      </button>
-                    )}
-                  </td>
-                  <td colSpan="3">
-                    <input
-                      className="form-control"
-                      type="text"
-                      placeholder="Search Drinks"
-                      value={filter.search}
-                      onChange={(e) => {
-                        const search = e.target.value;
-                        setFilter({ search, category: [] });
-                      }}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td className="text-muted">Category</td>
-                  <td className="text-muted">Name</td>
-                  <td className="text-muted">Is Popular</td>
-                  <td className="text-muted">ABV %</td>
-                  <td className="text-muted">Size</td>
-                  <td className="text-muted">Price</td>
+                  <td>Available Menus</td>
                 </tr>
               </thead>
               <tbody>
-                {filteredDrinks.map((drink) => (
+                {menus.map((menu) => (
                   <tr
                     className="shadow rounded-pill"
-                    key={drink._id}
+                    key={menu._id}
                     style={{ cursor: "pointer" }}
-                    onClick={() => setModifyDrink(drink)}
+                    onClick={() => setModifyMenu(menu)}
                   >
-                    <td className="p-4" style={{ width: "125px" }}>
-                      <img
-                        src={
-                          drink.category in categoryIcons
-                            ? categoryIcons[drink.category]
-                            : categoryIcons["default"]
-                        }
-                        alt="Drink Icon"
-                        style={{ height: "36px", width: "auto" }}
-                      />
-                    </td>
-                    <td style={{ width: "150px" }}>{drink.name}</td>
-                    <td>{drink.ispopular}</td>
-                    <td>{drink.abv}</td>
-                    <td>{drink.sizes?.length ? drink.sizes[0].size : 0}</td>
-                    <td>
-                      £
-                      {drink.sizes?.length
-                        ? parseFloat(drink.sizes[0].price).toFixed(2)
-                        : 0}
+                    <td>{menu.name}</td>
+                    <td className="text-right">
+                      {menu.active ? (
+                        <button
+                          type="button"
+                          className="btn btn-success btn-sm"
+                          disabled
+                          style={{ width: "150px" }}
+                        >
+                          Active
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="btn btn-primary btn-sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            activateMenu(menu._id);
+                          }}
+                          style={{ width: "150px" }}
+                        >
+                          Make Active
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -258,65 +114,82 @@ export default function Menu() {
           </div>
         </div>
       </div>
-
-      <AddOrUpdateDrinkModal
-        show={isModalVisible}
-        onSuccess={(drinks) => {
-          setDrinks(drinks);
-          setModalVisible(false);
+      <AddOrModifyMenu
+        show={addMenu || !!modifyMenu}
+        menu={modifyMenu}
+        onHide={() => {
+          setAddMenu(false);
+          setModifyMenu(false);
         }}
-        drink={modifyDrink}
-        onHide={() => setModalVisible(false)}
+        onSuccess={({ type, menu }) => {
+          switch (type) {
+            case "add":
+              setMenus((prevMenus) => [menu, ...prevMenus]);
+              break;
+            case "update":
+              setMenus((prevMenus) =>
+                prevMenus.map((m) => {
+                  if (m._id === modifyMenu._id) return menu;
+                  return m;
+                })
+              );
+              break;
+            case "delete":
+              setMenus((prevMenus) =>
+                prevMenus.filter((m) => m._id !== modifyMenu._id)
+              );
+            default:
+              break;
+          }
+
+          setAddMenu(false);
+          setModifyMenu(false);
+        }}
       />
     </div>
   );
 }
 
-/**
- * Add a drink if props.drink exists else Update.
- */
-function AddOrUpdateDrinkModal({ drink, show, onHide, onSuccess }) {
-
-  const [category, setCategory] = useState(drink?.category || "");
-  const [name, setName] = useState(drink?.name || "");
-  const [abv, setAbv] = useState(drink?.abv || "");
-  const [sizes, setSizes] = useState(drink?.sizes || []);
-  const [ispopular, setIspopular] = useState(drink?.ispopular || "yes");
-  const [instock, setInstock] = useState(drink?.instock || "yes");
-
-  // App State
+function AddOrModifyMenu({ show, menu, onHide, onSuccess }) {
+  const [modifiedName, setModifiedName] = useState("");
+  const [modifiedSpecials, setModifiedSpecials] = useState([]);
+  const [modifiedDrinks, setModifiedDrinks] = useState([]);
+  const [isFetching, setIsFetching] = useState(false);
   const { appState } = useContext(AppStore);
 
-  // Update state on Props changes
   useEffect(() => {
-    setCategory(drink?.category || "");
-    setName(drink?.name || "");
-    setAbv(drink?.abv || "");
-    setSizes(drink?.sizes || []);
-    setIspopular(drink?.ispopular || "yes");
-    setInstock(drink?.instock || "yes");
-  }, [drink]);
+    setModifiedName(menu?.name || "");
+  }, [menu]);
 
-  // Submit Drink
-  const submitDrink = (type) => {
+  const submitMenu = (type) => {
+    setIsFetching(true);
+
     let request;
-    console.log(type)
+
     switch (type) {
       case "add":
         // Add Request
         request = axios.post(
-          `${process.env.REACT_APP_API_ENDPOINT}/venue/drink`,
-          { category, name, abv, ispopular, sizes, instock },
+          `${process.env.REACT_APP_API_ENDPOINT}/menu`,
+          {
+            name: modifiedName,
+            drinks: modifiedDrinks,
+            specials: modifiedSpecials,
+          },
           {
             headers: { authorization: `Bearer ${appState.user.access_token}` },
           }
         );
         break;
       case "update":
-        // Patch Request
+        // Update Request
         request = axios.patch(
-          `${process.env.REACT_APP_API_ENDPOINT}/venue/drink/${drink._id}`,
-          { category, name, abv, ispopular, sizes, instock },
+          `${process.env.REACT_APP_API_ENDPOINT}/menu/${menu._id}`,
+          {
+            name: modifiedName,
+            drinks: modifiedDrinks,
+            specials: modifiedSpecials,
+          },
           {
             headers: { authorization: `Bearer ${appState.user.access_token}` },
           }
@@ -325,7 +198,7 @@ function AddOrUpdateDrinkModal({ drink, show, onHide, onSuccess }) {
       case "delete":
         // Delete Request
         request = axios.delete(
-          `${process.env.REACT_APP_API_ENDPOINT}/venue/drink/${drink._id}`,
+          `${process.env.REACT_APP_API_ENDPOINT}/menu/${menu._id}`,
           {
             headers: { authorization: `Bearer ${appState.user.access_token}` },
           }
@@ -335,120 +208,102 @@ function AddOrUpdateDrinkModal({ drink, show, onHide, onSuccess }) {
         break;
     }
 
-    // Send Request
-    request.then(
-      (response) => {
-        onSuccess(response.data);
+    // send request
+    request
+      .then(
+        (response) => {
+          onSuccess({ type, menu: response.data });
 
-        if (type === "add") toast.success("Added Drink!");
-        if (type === "update") toast.success("Updated Drink!");
-        if (type === "delete") toast.success("Deleted Drink!");
-      },
-      (err) => {
-        const message = Array.isArray(err.response?.data?.message)
-          ? err.response?.data?.message
-              .map((i) => <li>{i.message}</li>)
-              .reduce((prev, curr) => [prev, "", curr])
-          : err.response?.data?.message || err.message;
+          if (type === "add") toast.success("Added Menu!");
+          if (type === "update") toast.success("Updated Menu!");
+          if (type === "delete") toast.success("Deleted Menu!");
+        },
+        (err) => {
+          const message = Array.isArray(err.response?.data?.message)
+            ? err.response?.data?.message
+                .map((i) => <li>{i.message}</li>)
+                .reduce((prev, curr) => [prev, "", curr])
+            : err.response?.data?.message || err.message;
 
-        toast.error(<ul className="list-unstyled">{message}</ul>, {
-          autoClose: 10000,
-        });
-      }
-    );
+          toast.error(<ul className="list-unstyled">{message}</ul>, {
+            autoClose: 10000,
+          });
+        }
+      )
+      .finally(() => {
+        setIsFetching(false);
+      });
   };
 
   return (
     <Modal show={show} onHide={onHide}>
-      <Modal.Header closeButton>
-        <Modal.Title>{drink ? "Update Item" : "Add Item"}</Modal.Title>
+      <Modal.Header className="bg-light" closeButton>
+        <Modal.Title className="text-muted">
+          {menu ? "Modify Menu" : "Add Menu"}
+        </Modal.Title>
       </Modal.Header>
-
       <Modal.Body>
         <form>
-          <select
-            className="form-control my-4"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-          >
-            <option value="">Category</option>
-            <option value="Cocktails">Cocktails</option>
-            <option value="Spirits">Spirits</option>
-            <option value="Soft Drinks">Soft Drinks</option>
-            <option value="Beers & Bottles">Beers & Bottles</option>
-            <option value="Wines">Wines</option>
-            <option value="Shots">Shots</option>
-          </select>
-          <input
-            type="text"
-            className="form-control my-4"
-            placeholder="Drink Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <input
-            type="text"
-            className="form-control my-4"
-            placeholder="ABV"
-            value={abv}
-            onChange={(e) => setAbv(e.target.value)}
-          ></input>
-          <SizeSelector
-            sizes={sizes}
-            category={category}
-            onChange={(sizes) => setSizes(sizes)}
-          />
           <div className="my-4">
-            <label className="form-label font-weight-bold">Is popular</label>
-            <select
+            <label>Menu Name</label>
+            <input
+              type="text"
               className="form-control"
-              value={ispopular}
-              onChange={(e) => setIspopular(e.target.value)}
-            >
-              <option value="yes">Yes</option>
-              <option value="no">No</option>
-            </select>
+              placeholder="Menu Name"
+              value={modifiedName}
+              onChange={(e) => setModifiedName(e.target.value)}
+            />
           </div>
           <div className="my-4">
-            <label className="form-label font-weight-bold">In Stock</label>
-            <select
-              className="form-control"
-              value={instock}
-              onChange={(e) => setInstock(e.target.value)}
-            >
-              <option value="yes">Yes</option>
-              <option value="no">No</option>
-            </select>
+            <label className="font-weight-bold">Specials</label>
+            <SpecialSelector
+              initialSpecials={menu ? menu.specials : []}
+              onChange={(specials) => {
+                setModifiedSpecials(specials);
+              }}
+            />
+          </div>
+          <div className="my-4">
+            <label className="font-weight-bold">Drinks</label>
+            <DrinkSelector
+              initialDrinks={menu?.drinks || []}
+              onChange={(drinks) => {
+                setModifiedDrinks(drinks);
+              }}
+            />
           </div>
         </form>
       </Modal.Body>
-
       <Modal.Footer>
-        {drink && (
+        {menu ? (
           <>
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={() => submitDrink("delete")}
-            >
-              Delete Drink
-            </button>
+            {!menu?.active && (
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => submitMenu("delete")}
+                disabled={isFetching}
+              >
+                Delete Menu
+              </button>
+            )}
             <button
               type="button"
               className="btn btn-primary"
-              onClick={() => submitDrink("update")}
+              onClick={() => submitMenu("update")}
+              disabled={isFetching}
             >
-              Update Drink
+              Update Menu
             </button>
           </>
-        )}
-        {!drink && (
+        ) : (
           <button
             type="button"
             className="btn btn-primary btn-block"
-            onClick={() => submitDrink("add")}
+            onClick={() => submitMenu("add")}
+            disabled={isFetching}
           >
-            Save Drink
+            Save Menu
           </button>
         )}
       </Modal.Footer>
@@ -456,158 +311,131 @@ function AddOrUpdateDrinkModal({ drink, show, onHide, onSuccess }) {
   );
 }
 
-AddOrUpdateDrinkModal.defaultProps = {
-  drink: PropTypes.shape({
-    _id: 1,
-    category: "Shots",
-    name: "Default Name",
-    ispopular: false,
-    instock: false,
-    abv: 0,
-    sizes: [],
-  }),
-  show: false,
-  onSuccess: (i) => i,
-  onHide: (i) => i,
-};
+function SpecialSelector({ initialSpecials, onChange }) {
+  const [selectedSpecials, setSelectedSpecials] = useState(initialSpecials);
 
-AddOrUpdateDrinkModal.propTypes = {
-  drink: PropTypes.shape({
-    _id: PropTypes.string,
-    search: "",
-    category: PropTypes.string,
-    name: PropTypes.string,
-    ispopular: PropTypes.string,
-    instock: PropTypes.string,
-    abv: PropTypes.string,
-    sizes: PropTypes.arrayOf(
-      PropTypes.shape({
-        size: PropTypes.string,
-        price: PropTypes.string,
-      })
-    ),
-  }),
-  show: PropTypes.bool.isRequired,
-  onSuccess: PropTypes.func,
-  onHide: PropTypes.func,
-};
+  const {
+    appState: { venue },
+  } = useContext(AppStore);
 
-function SizeSelector(props) {
-  const [sizes, setSizes] = useState(props.sizes || []);
-
-  // Size Options
-  const sizeOptions = {
-    Spirits: ["Single", "Double", "Triple", "Bottle"],
-    Cocktails: ["Standard", "Large", "Pitcher", "Jug"],
-    Wines: [
-      "Bottle",
-      "125ml Glass",
-      "175ml Glass",
-      "250ml Glass",
-      "500ml Bottle",
-      "750ml Bottle",
-      "1L Bottle",
-    ],
-    "Soft Drinks": ["Can", "Standard", "Large", "Bottle"],
-    "Beers & Bottles": [
-      "Pint",
-      "Half-Pint",
-      "330ml Bottle",
-      "500ml Bottle",
-      "275ml Bottle",
-      "470ml Bottle",
-      "550ml Bottle",
-      "640ml Bottle",
-      "355ml Bottle",
-    ],
-    Shots: ["Single", "Double", "Triple", "Bomb"],
-  };
-
-  // emit onChange
   useEffect(() => {
-    props.onChange(sizes);
-  }, [sizes, props]);
+    onChange(selectedSpecials);
+  }, [selectedSpecials]);
 
-  console.log("sizes:", sizes);
+  return [...selectedSpecials, ""].map((specialId, i) => (
+    <div className="row" key={i}>
+      <div className="col-6">
+        <select
+          className="form-control"
+          value={specialId}
+          onChange={(e) => {
+            const value = e.target.value;
 
-  return (
-    <div className="my-5">
-      <label className="form-label font-weight-bold">Sizes</label>
-      {Array(sizes.filter((s) => s.size && s.price).length + 1)
-        .fill()
-        .map((_, i) => (
-          <div className="d-flex align-items-bottom" key={i}>
-            <select
-              className="form-control mr-2"
-              value={sizes[i]?.size || ""}
-              onChange={(e) => {
-                const value = e.target.value;
-                setSizes((s) => {
-                  const newS = [...s];
-                  newS[i] = { ...newS[i], size: value };
-                  return newS;
-                });
-              }}
-            >
-              <option value="">Size</option>
-              {props.category in sizeOptions &&
-                sizeOptions[props.category].map((s) => (
-                  <option value={s} key={s}>
-                    {s}
-                  </option>
-                ))}
-            </select>
-            <input
-              type="text"
-              className="form-control mx-2"
-              placeholder="Price"
-              value={sizes[i]?.price || ""}
-              onChange={(e) => {
-                const value = e.target.value;
-                setSizes((s) => {
-                  const newS = [...s];
-                  newS[i] = { ...newS[i], price: value };
-                  return newS;
-                });
-              }}
-            ></input>
-
-            <button
-              type="button"
-              className="btn btn-link btn-sm"
-              style={{
-                visibility:
-                  sizes[i]?.size && sizes[i]?.price ? "visible" : "hidden",
-              }}
-              onClick={() => {
-                setSizes((s) => {
-                  const newS = [...s];
-                  newS.splice(i, 1);
-                  return newS;
-                });
-              }}
-            >
-              Remove
-            </button>
-          </div>
-        ))}
+            setSelectedSpecials((prevSelectedSpecials) => {
+              const newSelectedSpecials = [...prevSelectedSpecials];
+              newSelectedSpecials[i] = value;
+              return newSelectedSpecials;
+            });
+          }}
+        >
+          <option value="">Select Special</option>
+          {venue.specials.map((venueSpecial, j) => (
+            <option key={j} value={venueSpecial._id}>
+              {venueSpecial.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="col-3 d-flex align-items-center">
+        {specialId && (
+          <>
+            £
+            {venue.specials.some((v) => v._id === specialId)
+              ? venue.specials.find((v) => v._id === specialId).price
+              : 0.0}
+          </>
+        )}
+      </div>
+      <div className="col-3 d-flex align-items-center justify-content-center">
+        {specialId && (
+          <a
+            className="btn btn-link"
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              setSelectedSpecials((prevSelectedSpecials) =>
+                prevSelectedSpecials.filter((_id) => _id !== specialId)
+              );
+            }}
+          >
+            Remove
+          </a>
+        )}
+      </div>
     </div>
-  );
+  ));
 }
 
-SizeSelector.defaultProps = {
-  sizes: [],
-  category: "",
-  onChange: (i) => i,
-};
+function DrinkSelector({ initialDrinks, onChange }) {
+  const [selectedDrinks, setSelectedDrinks] = useState(initialDrinks);
 
-SizeSelector.propTypes = {
-  sizes: PropTypes.arrayOf(
-    PropTypes.shape({
-      size: PropTypes.string,
-      price: PropTypes.string,
-    })
-  ),
-  category: PropTypes.string,
-  onChange: PropTypes.func,
-};
+  const {
+    appState: { venue },
+  } = useContext(AppStore);
+
+  useEffect(() => {
+    onChange(selectedDrinks);
+  }, [selectedDrinks]);
+
+  return [...selectedDrinks, ""].map((drinkId, i) => (
+    <div className="row" key={i}>
+      <div className="col-6">
+        <select
+          className="form-control"
+          value={drinkId}
+          onChange={(e) => {
+            const value = e.target.value;
+
+            setSelectedDrinks((prevSelectedDrinks) => {
+              const newSelectedDrinks = [...prevSelectedDrinks];
+              newSelectedDrinks[i] = value;
+              return newSelectedDrinks;
+            });
+          }}
+        >
+          <option value="">Select Drink</option>
+          {venue.drinks.map((venueDrink, j) => (
+            <option key={j} value={venueDrink._id}>
+              {venueDrink.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="col-3 d-flex align-items-center">
+        {drinkId && (
+          <>
+            £
+            {venue.drinks.some((d) => d._id === drinkId)
+              ? venue.drinks.find((d) => d._id === drinkId).sizes[0]?.price ||
+                0.0
+              : 0.0}
+          </>
+        )}
+      </div>
+      <div className="col-3 d-flex align-items-center justify-content-center">
+        {drinkId && (
+          <div
+            className="btn btn-link"
+            onClick={() =>
+              setSelectedDrinks((prevSelectedDrinks) =>
+                prevSelectedDrinks.filter((_id) => _id !== drinkId)
+              )
+            }
+          >
+            Remove
+          </div>
+        )}
+      </div>
+    </div>
+  ));
+}

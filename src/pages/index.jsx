@@ -76,7 +76,7 @@ export default function Index() {
         </Switch>
       </Router>
       <ToastContainer
-        position="top-center"
+        position="bottom-right"
         hideProgressBar={true}
         newestOnTop={true}
         autoClose={2000}

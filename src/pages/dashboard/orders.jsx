@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useContext } from "react";
+import PropTypes from "prop-types";
+import Modal from "react-bootstrap/Modal";
 import { toast } from "react-toastify";
 import axios from "axios";
 import dayjs from "dayjs";
 
 import { AppStore } from "store";
 
-export default function History() {
+export default function Orders() {
   const [orders, setOrders] = useState([]);
   const [filter, setFilter] = useState({
     name: "",
@@ -13,6 +15,7 @@ export default function History() {
     from: "",
     to: "",
   });
+  const [viewOrder, setViewOrder] = useState(null);
 
   const {
     appState: { user },
@@ -39,7 +42,7 @@ export default function History() {
   }, [filter, user]);
 
   return (
-    <div className="container container-history">
+    <div className="container container-orders">
       <div className="row mt-3 mb-5">
         <div className="col-sm">
           <h1 className="text-light text-weight-bold">Order History</h1>
@@ -166,9 +169,10 @@ export default function History() {
                   <tr
                     key={order._id}
                     className="shadow rounded-pill"
-                    style={{ height: "85px" }}
+                    style={{ height: "85px", cursor: "pointer" }}
+                    onClick={() => setViewOrder(order)}
                   >
-                    <td>
+                    <td className="right-divider">
                       <h2 className="m-0">{order.orderID}</h2>
                     </td>
                     <td>{order.customer.name}</td>
@@ -183,6 +187,77 @@ export default function History() {
           </div>
         </div>
       </div>
+      <ModalOrder
+        order={viewOrder}
+        show={!!viewOrder?._id}
+        onHide={() => setViewOrder(null)}
+      />
     </div>
   );
 }
+
+function ModalOrder({ order, show, onHide }) {
+  if (!order) return null;
+
+  return (
+    <Modal show={show} onHide={onHide}>
+      <Modal.Header className="bg-light" closeButton>
+        <Modal.Title className="text-muted">
+          Order No. {order?.orderID}
+        </Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <div className="text-center">Customer: {order?.customer?.name}</div>
+        <table className="table table-borderless my-2">
+          <thead>
+            <tr>
+              <th>Drinks</th>
+            </tr>
+          </thead>
+          <tbody className="border-bottom">
+            {order?.drinks.map((drink) => (
+              <tr>
+                <td>
+                  ({drink.quantity}x) {drink.name}
+                  {drink.category === "option" &&
+                    drink.specialOptions.length !== 0 && (
+                      <ul className="list-unstyled list-plus text-secondary">
+                        {drink.specialOptions.map((option) => (
+                          <li>{option.drinkName}</li>
+                        ))}
+                      </ul>
+                    )}
+                </td>
+                <td>£{drink.price}</td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td>Total Paid:</td>
+              <td>
+                £
+                {order?.drinks.reduce(
+                  (accumulator, d) => accumulator + parseFloat(d.price),
+                  0
+                )}
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </Modal.Body>
+    </Modal>
+  );
+}
+
+ModalOrder.defaultProps = {
+  order: null,
+  show: false,
+  onHide: (i) => i,
+};
+
+ModalOrder.propTypes = {
+  order: PropTypes.shape({
+    orderID: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  }),
+};

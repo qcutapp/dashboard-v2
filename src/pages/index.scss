@@ -29,6 +29,7 @@ $rounded-pill: 0.5rem;
 @import "~bootstrap/scss/_button-group";
 @import "~bootstrap/scss/_nav";
 @import "~bootstrap/scss/_card";
+@import "~bootstrap/scss/_badge";
 @import "~bootstrap/scss/_close";
 @import "~bootstrap/scss/_modal";
 @import "~bootstrap/scss/_utilities";
@@ -38,6 +39,7 @@ $rounded-pill: 0.5rem;
  **************/
 
 $bg-gray: rgb(233, 233, 233);
+$bg-grayer: rgb(57, 63, 77);
 
 html,
 body,
@@ -53,33 +55,35 @@ body,
 }
 
 .login {
-  background: $bg-gray;
-  
-  &:before {
-    content: "";
-    position: absolute;
-    background: $primary;
-    display: block;
-    height: 58%;
-    top: 0;
-    left: 0;
-    right: 0;
-    transform: skewY(-7deg);
-    transform-origin: 0 100%;
-  }
+  background-color: $bg-grayer;
+}
+
+.sidebar {
+  background-color: $bg-grayer;
 }
 
 .login-card {
-  height: 30em;
-  width: 45em;
+  width: 40em;
+  input {
+    border-width: 1px;
+    border-radius: 0.25rem;
+  }
 }
 
-.venue-brand:after {
-  display: block;
-  position: absolute;
-  height: 10px;
-  width: 10px;
-  background: red;
+.divider-line-dark {
+  border-bottom: 1px solid $gray-700;
+}
+
+.nav-link-active {
+  color: $primary !important;
+  box-shadow: none !important;
+  &::before {
+    content: "•";
+    color: red;
+    display: inline-block;
+    width: 1em;
+    margin-left: -1em;
+  }
 }
 
 .venue-logo {
@@ -91,11 +95,19 @@ body,
   background-size: contain;
 }
 
+.img-preview {
+  height: 64px;
+  width: 64px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
 .nav-link .svg-inline--fa {
   margin-right: 1rem;
 }
 
-.col-main {
+.main {
   background-color: $bg-gray;
   overflow: scroll;
   &:before {
@@ -123,18 +135,16 @@ table.cards {
     td {
       position: relative;
       vertical-align: middle;
-      &:nth-child(1) {
-        &:after {
-          content: "";
-          position: absolute;
-          display: block;
-          top: 25%;
-          right: 25px;
-          height: 50%;
-          width: $border-width;
-          background-color: $gray-400;
-        }
-      }
+    }
+    td.right-divider:after {
+      content: "";
+      position: absolute;
+      display: block;
+      top: 25%;
+      right: 25px;
+      height: 50%;
+      width: $border-width;
+      background-color: $gray-400;
     }
   }
 }
@@ -171,6 +181,12 @@ table.cards {
 
 .shadow {
   box-shadow: 0 0rem 0.8rem 0.2rem rgba(0, 0, 0, 0.1) !important;
+}
+
+.list-plus > li:before {
+  content: "+";
+  padding-left: 1.5em;
+  padding-right: 0.75em;
 }
 
 // Toast

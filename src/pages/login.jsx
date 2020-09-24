@@ -27,46 +27,49 @@ export default function Login() {
 
   return (
     <div className="login min-vh-100 d-flex justify-content-center align-items-center">
-      <div className="card login-card rounded-pill shadow">
-        <div className="card-body px-5 pt-3">
-          <div className="login-brand text-center">
-            <img
-              className="img-fluid mx-auto rounded-circle mb-4"
-              src={process.env.PUBLIC_URL + "/logo.png"}
-              style={{ maxWidth: "15%", minWidth: "64px" }}
-              alt="QCut Logo"
-            />
-            <h4 className="card-title font-weight-bold">Venue Sign-In</h4>
+      <div>
+        <div className="login-brand text-center my-3">
+          <img
+            className="img-fluid w-50"
+            src={process.env.PUBLIC_URL + "/logo.png"}
+            alt="QCut Logo"
+          />
+          <h4 className="font-weight-light text-light my-1">PARTNERS</h4>
+        </div>
+        <div className="card login-card rounded-pill shadow">
+          <div className="card-body px-5 pt-3">
+            <form className="mt-5">
+              <div className="form-group mb-3">
+                <label>EMAIL</label>
+                <input
+                  type="email"
+                  className="form-control"
+                  placeholder="Email Address..."
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              <div className="form-group mt-3 mb-4">
+                <label>PASSWORD</label>
+                <input
+                  type="password"
+                  className="form-control"
+                  placeholder="Password..."
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+              <div className="form-group mt-4">
+                <button
+                  type="button"
+                  className="btn btn-primary btn-block"
+                  onClick={handleSubmit}
+                >
+                  Login
+                </button>
+              </div>
+            </form>
           </div>
-          <form className="mt-5">
-            <div className="form-group mb-3">
-              <input
-                type="email"
-                className="form-control"
-                placeholder="Enter email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div className="form-group mt-3 mb-4">
-              <input
-                type="password"
-                className="form-control"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-            <div className="form-group mt-4">
-              <button
-                type="button"
-                className="btn btn-primary btn-block"
-                onClick={handleSubmit}
-              >
-                Login
-              </button>
-            </div>
-          </form>
         </div>
       </div>
     </div>
