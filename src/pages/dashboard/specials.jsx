@@ -184,6 +184,7 @@ function AddOrUpdateSpecial({ show, special, onSuccess, onHide }) {
   const [options, setOptions] = useState([]);
   const [description, setDescription] = useState("");
   const { appState } = useContext(AppStore);
+  const [isFetching, setIsFetching] = useState(false);
 
   useEffect(() => {
     setName(special?.name || "");
@@ -196,6 +197,8 @@ function AddOrUpdateSpecial({ show, special, onSuccess, onHide }) {
   }, [special]);
 
   const submitSpecial = (requestType) => {
+    setIsFetching(true);
+
     let request;
 
     switch (requestType) {
@@ -233,26 +236,30 @@ function AddOrUpdateSpecial({ show, special, onSuccess, onHide }) {
     }
 
     // send request
-    request.then(
-      (response) => {
-        onSuccess({ type: requestType, special: response.data });
+    request
+      .then(
+        (response) => {
+          onSuccess({ type: requestType, special: response.data });
 
-        if (requestType === "add") toast.success("Added Special!");
-        if (requestType === "update") toast.success("Updated Special!");
-        if (requestType === "delete") toast.success("Deleted Special!");
-      },
-      (err) => {
-        const message = Array.isArray(err.response?.data?.message)
-          ? err.response?.data?.message
-              .map((i) => <li>{i.message}</li>)
-              .reduce((prev, curr) => [prev, "", curr])
-          : err.response?.data?.message || err.message;
+          if (requestType === "add") toast.success("Added Special!");
+          if (requestType === "update") toast.success("Updated Special!");
+          if (requestType === "delete") toast.success("Deleted Special!");
+        },
+        (err) => {
+          const message = Array.isArray(err.response?.data?.message)
+            ? err.response?.data?.message
+                .map((i) => <li>{i.message}</li>)
+                .reduce((prev, curr) => [prev, "", curr])
+            : err.response?.data?.message || err.message;
 
-        toast.error(<ul className="list-unstyled">{message}</ul>, {
-          autoClose: 10000,
-        });
-      }
-    );
+          toast.error(<ul className="list-unstyled">{message}</ul>, {
+            autoClose: 10000,
+          });
+        }
+      )
+      .finally(() => {
+        setIsFetching(false);
+      });
   };
 
   return (
@@ -353,6 +360,7 @@ function AddOrUpdateSpecial({ show, special, onSuccess, onHide }) {
               type="button"
               className="btn btn-secondary"
               onClick={() => submitSpecial("delete")}
+              disabled={isFetching}
             >
               Delete Special
             </button>
@@ -360,6 +368,7 @@ function AddOrUpdateSpecial({ show, special, onSuccess, onHide }) {
               type="button"
               className="btn btn-primary"
               onClick={() => submitSpecial("update")}
+              disabled={isFetching}
             >
               Update Special
             </button>
@@ -370,6 +379,7 @@ function AddOrUpdateSpecial({ show, special, onSuccess, onHide }) {
             type="button"
             className="btn btn-primary btn-block"
             onClick={() => submitSpecial("add")}
+            disabled={isFetching}
           >
             Save Special
           </button>

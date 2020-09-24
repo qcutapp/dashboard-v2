@@ -277,6 +277,7 @@ function AddOrUpdateDrinkModal({ drink, show, onHide, onSuccess }) {
   const [ispopular, setIspopular] = useState(drink?.ispopular || "yes");
   const [instock, setInstock] = useState(drink?.instock || "yes");
   const [availableCategories, setAvailableCategories] = useState([]);
+  const [isFetching, setIsFetching] = useState(false);
 
   useEffect(() => {
     axios
@@ -303,6 +304,8 @@ function AddOrUpdateDrinkModal({ drink, show, onHide, onSuccess }) {
 
   // Submit Drink
   const submitDrink = (type) => {
+    setIsFetching(true);
+
     let request;
 
     switch (type) {
@@ -340,26 +343,30 @@ function AddOrUpdateDrinkModal({ drink, show, onHide, onSuccess }) {
     }
 
     // Send Request
-    request.then(
-      (response) => {
-        onSuccess({ type, drink: response.data });
+    request
+      .then(
+        (response) => {
+          onSuccess({ type, drink: response.data });
 
-        if (type === "add") toast.success("Added Drink!");
-        if (type === "update") toast.success("Updated Drink!");
-        if (type === "delete") toast.success("Deleted Drink!");
-      },
-      (err) => {
-        const message = Array.isArray(err.response?.data?.message)
-          ? err.response?.data?.message
-              .map((i) => <li>{i.message}</li>)
-              .reduce((prev, curr) => [prev, "", curr])
-          : err.response?.data?.message || err.message;
+          if (type === "add") toast.success("Added Drink!");
+          if (type === "update") toast.success("Updated Drink!");
+          if (type === "delete") toast.success("Deleted Drink!");
+        },
+        (err) => {
+          const message = Array.isArray(err.response?.data?.message)
+            ? err.response?.data?.message
+                .map((i) => <li>{i.message}</li>)
+                .reduce((prev, curr) => [prev, "", curr])
+            : err.response?.data?.message || err.message;
 
-        toast.error(<ul className="list-unstyled">{message}</ul>, {
-          autoClose: 10000,
-        });
-      }
-    );
+          toast.error(<ul className="list-unstyled">{message}</ul>, {
+            autoClose: 10000,
+          });
+        }
+      )
+      .finally(() => {
+        setIsFetching(false);
+      });
   };
 
   return (
@@ -462,6 +469,7 @@ function AddOrUpdateDrinkModal({ drink, show, onHide, onSuccess }) {
               type="button"
               className="btn btn-secondary"
               onClick={() => submitDrink("delete")}
+              disabled={isFetching}
             >
               Delete Drink
             </button>
@@ -469,6 +477,7 @@ function AddOrUpdateDrinkModal({ drink, show, onHide, onSuccess }) {
               type="button"
               className="btn btn-primary"
               onClick={() => submitDrink("update")}
+              disabled={isFetching}
             >
               Update Drink
             </button>
@@ -479,6 +488,7 @@ function AddOrUpdateDrinkModal({ drink, show, onHide, onSuccess }) {
             type="button"
             className="btn btn-primary btn-block"
             onClick={() => submitDrink("add")}
+            disabled={isFetching}
           >
             Save Drink
           </button>
