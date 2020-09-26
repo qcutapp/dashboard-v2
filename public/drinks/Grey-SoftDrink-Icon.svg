@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="68" viewBox="0 0 64 68">
+  <g id="Grey-SoftDrink-Icon" transform="translate(-646 464)">
+    <g id="Path_21" data-name="Path 21" transform="translate(646 -464)" fill="#fff">
+      <path d="M 50.65898513793945 67 L 13.31103992462158 67 L 1.2001953125 1 L 62.79927825927734 1 L 50.65898513793945 67 Z" stroke="none"/>
+      <path d="M 2.400386810302734 2 L 14.14424133300781 66 L 49.82615661621094 66 L 61.59855651855469 2 L 2.400386810302734 2 M 0 0 L 64 0 L 51.4918212890625 68 L 12.47784423828125 68 L 0 0 Z" stroke="none" fill="#a09d9d"/>
+    </g>
+    <g id="Rectangle_19" data-name="Rectangle 19" transform="translate(681.795 -453.864) rotate(9)" fill="#fff" stroke="#a09d9d" stroke-width="0.5">
+      <rect width="7" height="7" rx="1" stroke="none"/>
+      <rect x="0.25" y="0.25" width="6.5" height="6.5" rx="0.75" fill="none"/>
+    </g>
+    <g id="Rectangle_20" data-name="Rectangle 20" transform="translate(692.254 -451.992) rotate(-17)" fill="#fff" stroke="#a09d9d" stroke-width="0.5">
+      <rect width="9" height="9" rx="1" stroke="none"/>
+      <rect x="0.25" y="0.25" width="8.5" height="8.5" rx="0.75" fill="none"/>
+    </g>
+    <g id="Rectangle_21" data-name="Rectangle 21" transform="matrix(0.978, -0.208, 0.208, 0.978, 655.553, -448.556)" fill="#fff" stroke="#a09d9d" stroke-width="0.5">
+      <rect width="7" height="7" rx="1" stroke="none"/>
+      <rect x="0.25" y="0.25" width="6.5" height="6.5" rx="0.75" fill="none"/>
+    </g>
+    <g id="Path_22" data-name="Path 22" transform="translate(646 -447.275)" fill="#a09d9d">
+      <path d="M 51.07315444946289 50.77474975585938 L 13.54379081726074 50.77474975585938 L 4.77630090713501 0.6076006293296814 C 5.888876438140869 0.7710481882095337 8.259675025939941 1.046950101852417 11.58634948730469 1.046950101852417 C 17.21833038330078 1.046950101852417 22.93011856079102 0.275140106678009 28.56305885314941 -1.247049927711487 C 31.75198936462402 -2.108799934387207 35.45113754272461 -2.545739889144897 39.55776977539062 -2.545739889144897 C 49.0404052734375 -2.545739889144897 58.03448486328125 -0.2084759324789047 60.07119750976562 0.3570432066917419 L 51.07315444946289 50.77474975585938 Z" stroke="none"/>
+      <path d="M 39.55777740478516 -2.045738220214844 C 35.49499893188477 -2.045688629150391 31.83971786499023 -1.614570617675781 28.69348907470703 -0.7643699645996094 C 23.01803970336914 0.7693099975585938 17.26237106323242 1.546951293945312 11.58634948730469 1.546951293945312 C 8.804031372070312 1.546951293945312 6.677051544189453 1.354690551757812 5.386405944824219 1.1942138671875 L 13.96399307250977 50.27474975585938 L 50.65449523925781 50.27474975585938 L 59.49869155883789 0.7190742492675781 C 56.84607696533203 0.007884979248046875 48.41739654541016 -2.045848846435547 39.55777740478516 -2.045738220214844 M 39.55776977539062 -3.045734405517578 C 50.48853302001953 -3.045864105224609 60.64281845092773 0 60.64281845092773 0 L 51.4918212890625 51.27474975585938 L 13.12360000610352 51.27474975585938 L 4.162540435791016 0 C 4.162540435791016 0 6.955593109130859 0.5469512939453125 11.58634948730469 0.5469512939453125 C 15.87626266479492 0.5469512939453125 21.74310302734375 0.07796859741210938 28.43262100219727 -1.729740142822266 C 31.98072052001953 -2.688541412353516 35.81506729125977 -3.045692443847656 39.55776977539062 -3.045734405517578 Z" stroke="none" fill="#a09d9d"/>
+    </g>
+    <g id="Rectangle_22" data-name="Rectangle 22" transform="translate(661.795 -448.864) rotate(9)" fill="#f8f7f7" stroke="#a09d9d" stroke-width="0.5">
+      <rect width="7" height="7" rx="1" stroke="none"/>
+      <rect x="0.25" y="0.25" width="6.5" height="6.5" rx="0.75" fill="none"/>
+    </g>
+    <g id="Ellipse_11" data-name="Ellipse 11" transform="translate(665 -422)" fill="#fff" stroke="#a09d9d" stroke-width="0.5">
+      <circle cx="1.5" cy="1.5" r="1.5" stroke="none"/>
+      <circle cx="1.5" cy="1.5" r="1.25" fill="none"/>
+    </g>
+    <g id="Ellipse_12" data-name="Ellipse 12" transform="translate(685 -430)" fill="#fff" stroke="#a09d9d" stroke-width="0.5">
+      <circle cx="1.5" cy="1.5" r="1.5" stroke="none"/>
+      <circle cx="1.5" cy="1.5" r="1.25" fill="none"/>
+    </g>
+    <g id="Ellipse_13" data-name="Ellipse 13" transform="translate(683 -413)" fill="#fff" stroke="#a09d9d" stroke-width="0.5">
+      <circle cx="1.5" cy="1.5" r="1.5" stroke="none"/>
+      <circle cx="1.5" cy="1.5" r="1.25" fill="none"/>
+    </g>
+    <g id="Ellipse_14" data-name="Ellipse 14" transform="translate(673 -435)" fill="#fff" stroke="#a09d9d" stroke-width="0.5">
+      <circle cx="1.5" cy="1.5" r="1.5" stroke="none"/>
+      <circle cx="1.5" cy="1.5" r="1.25" fill="none"/>
+    </g>
+    <g id="Rectangle_23" data-name="Rectangle 23" transform="translate(683.601 -450.628) rotate(-11)" fill="#f8f7f7" stroke="#a09d9d" stroke-width="0.5">
+      <rect width="7" height="7" rx="1" stroke="none"/>
+      <rect x="0.25" y="0.25" width="6.5" height="6.5" rx="0.75" fill="none"/>
+    </g>
+    <g id="Rectangle_18" data-name="Rectangle 18" transform="translate(669.254 -451.992) rotate(-17)" fill="#f8f7f7" stroke="#a09d9d" stroke-width="0.5">
+      <rect width="9" height="9" rx="1" stroke="none"/>
+      <rect x="0.25" y="0.25" width="8.5" height="8.5" rx="0.75" fill="none"/>
+    </g>
+    <g id="Ellipse_15" data-name="Ellipse 15" transform="translate(695 -439)" fill="#fff" stroke="#a09d9d" stroke-width="0.5">
+      <circle cx="1.5" cy="1.5" r="1.5" stroke="none"/>
+      <circle cx="1.5" cy="1.5" r="1.25" fill="none"/>
+    </g>
+  </g>
+</svg>
