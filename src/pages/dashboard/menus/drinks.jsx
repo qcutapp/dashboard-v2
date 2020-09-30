@@ -1,15 +1,37 @@
-import React, { useState, useContext, useEffect } from "react";
-import Modal from "react-bootstrap/Modal";
-import { toast } from "react-toastify";
+import React, { useState, useEffect, useContext } from "react";
 import PropTypes from "prop-types";
+import { useRouteMatch } from "react-router-dom";
 import axios from "axios";
-import UploadFile from "components/UploadFile";
+import { toast } from "react-toastify";
 
 import { AppStore } from "store";
 
+import Modal from "react-bootstrap/Modal";
+import UploadFile from "components/UploadFile";
+
+// .env
+const { REACT_APP_API_ENDPOINT, PUBLIC_URL } = process.env;
+
+// Category icons
+const categoryIcons = {
+  Shots: PUBLIC_URL + "/drinks/Grey-Shots-Icon.svg",
+  Spirits: PUBLIC_URL + "/drinks/Grey-Spirit-Icon.svg",
+  Cocktails: PUBLIC_URL + "/drinks/Grey-Cocktail-Icon.svg",
+  Wines: PUBLIC_URL + "/drinks/Grey-Wine-Icon.svg",
+  Beers: PUBLIC_URL + "/drinks/Grey-beer-Icon.svg",
+  Ciders: PUBLIC_URL + "/drinks/Grey-Cider-Icon.svg",
+  "Soft Drinks": PUBLIC_URL + "/drinks/Grey-SoftDrink-Icon.svg",
+  "Hot Drinks": PUBLIC_URL + "/drinks/Grey-Hot-Icon.svg",
+  Sparkling: PUBLIC_URL + "/drinks/Grey-Sparkling-Icon.svg",
+  Bottles: PUBLIC_URL + "/drinks/Grey-Bottles-Icon.svg",
+  Alcopops: PUBLIC_URL + "/drinks/Grey-Alcopops-Icon.svg",
+  Liquers: PUBLIC_URL + "/drinks/Grey-Liquors-Icon.svg",
+  default: PUBLIC_URL + "/drinks/Grey-Shots-Icon.svg",
+};
+
 export default function Drinks() {
   const [drinks, setDrinks] = useState([]);
-  const [venueCategories, setVenueCategories] = useState([]);
+  const [drinkCategories, setMenuDrinkCategories] = useState([]);
   const [addDrink, setAddDrink] = useState(false);
   const [modifyDrink, setModifyDrink] = useState(null);
   const [filter, setFilter] = useState({
@@ -17,17 +39,21 @@ export default function Drinks() {
     search: "",
   });
 
+  const match = useRouteMatch("/dashboard/menus/:menu_id/drinks");
+  const menu_id = match.params.menu_id;
+
   // App state
   const {
-    appState: { venue, user },
-    appDispatch,
+    appState: {
+      user: { access_token },
+    },
   } = useContext(AppStore);
 
+  // fetch: drinks
   useEffect(() => {
-    // Get drinks
     axios
-      .get(`${process.env.REACT_APP_API_ENDPOINT}/venue/drink`, {
-        headers: { authorization: `Bearer ${user.access_token}` },
+      .get(`${REACT_APP_API_ENDPOINT}/venue/drink/${menu_id}`, {
+        headers: { authorization: `Bearer ${access_token}` },
       })
       .then((response) => {
         setDrinks(response.data);
@@ -35,19 +61,21 @@ export default function Drinks() {
       .catch((err) => {
         toast.error(err.response?.data?.message || err.message);
       });
+  }, [menu_id, access_token]);
 
-    // Get categories
+  // fetch: categories
+  useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_API_ENDPOINT}/venue/categories`, {
-        headers: { authorization: `Bearer ${user.access_token}` },
+      .get(`${REACT_APP_API_ENDPOINT}/menu/${menu_id}/categories`, {
+        headers: { authorization: `Bearer ${access_token}` },
       })
       .then((response) => {
-        setVenueCategories(response.data);
+        setMenuDrinkCategories(response.data);
       })
       .catch((err) => {
         toast.error(err.response?.data?.message || err.message);
       });
-  }, [venue, user]);
+  }, [menu_id, access_token, drinks]);
 
   // Filter drinks
   let filteredDrinks = drinks
@@ -55,13 +83,13 @@ export default function Drinks() {
     .filter((drink) => {
       if (!filter.category.length && !filter.search) return true;
 
-      if (filter.category.length && filter.category.includes(drink.category)) {
+      if (filter.category.length && filter.category.includes(drink?.category)) {
         return true;
       }
 
       if (
         filter.search &&
-        drink.name.toLowerCase().includes(filter.search.toLowerCase())
+        drink?.name?.toLowerCase().includes(filter.search.toLowerCase())
       ) {
         return true;
       }
@@ -72,29 +100,9 @@ export default function Drinks() {
   // Sort drinks
   filteredDrinks.sort((a, b) => (a.updatedAt > b.updatedAt ? -1 : 1));
 
-  // Category icons
-  const categoryIcons = {
-    Shots: process.env.PUBLIC_URL + "/drinks/Grey-Shots-Icon.svg",
-    Spirits: process.env.PUBLIC_URL + "/drinks/Grey-Spirit-Icon.svg",
-    Cocktails: process.env.PUBLIC_URL + "/drinks/Grey-Cocktail-Icon.svg",
-    Wines: process.env.PUBLIC_URL + "/drinks/Grey-Wine-Icon.svg",
-    Beers: process.env.PUBLIC_URL + "/drinks/Grey-beer-Icon.svg",
-    Ciders: process.env.PUBLIC_URL + "/drinks/Grey-Cider-Icon.svg",
-    "Soft Drinks": process.env.PUBLIC_URL + "/drinks/Grey-SoftDrink-Icon.svg",
-    "Hot Drinks": process.env.PUBLIC_URL + "/drinks/Grey-Hot-Icon.svg",
-    Sparkling: process.env.PUBLIC_URL + "/drinks/Grey-Sparkling-Icon.svg",
-    Bottles: process.env.PUBLIC_URL + "/drinks/Grey-Bottles-Icon.svg",
-    Alcopops: process.env.PUBLIC_URL + "/drinks/Grey-Alcopops-Icon.svg",
-    Liquers: process.env.PUBLIC_URL + "/drinks/Grey-Liquors-Icon.svg",
-    default: process.env.PUBLIC_URL + "/drinks/Grey-Shots-Icon.svg",
-  };
-
   return (
-    <div className="container container-drinks">
-      <div className="row mt-3 mb-5">
-        <div className="col-sm">
-          <h1 className="text-light text-weight-bold">Your Drinks</h1>
-        </div>
+    <>
+      <div className="row">
         <div className="col-sm text-right">
           <div
             className="btn btn-primary btn-primary-hover-none btn-lg"
@@ -102,7 +110,7 @@ export default function Drinks() {
           >
             Add Drink
             <img
-              src={process.env.PUBLIC_URL + "/add-icon.png"}
+              src={PUBLIC_URL + "/add-icon.png"}
               alt="Add Drink"
               style={{ marginLeft: "1rem", width: "24px" }}
             />
@@ -121,7 +129,7 @@ export default function Drinks() {
             >
               All
             </button>
-            {venueCategories.map((category, z) => (
+            {drinkCategories.map((category, z) => (
               <button
                 type="button"
                 className={`btn btn-primary btn-primary-hover-none btn-primary-focus-none btn-primary-active-none text-height-lg ${
@@ -144,7 +152,7 @@ export default function Drinks() {
               <thead>
                 <tr>
                   <td colSpan="3" style={{ verticalAlign: "bottom" }}>
-                    {filteredDrinks.length} Items Showing
+                    {filteredDrinks.length} Drinks Showing
                     {Object.keys(filter).some((i) => filter[i].length) && (
                       <button
                         type="button"
@@ -185,8 +193,8 @@ export default function Drinks() {
                     onClick={() => setModifyDrink(drink)}
                   >
                     <td
-                      className="p-4 right-divider"
-                      style={{ width: "125px" }}
+                      className="p-4 text-center right-divider"
+                      style={{ width: "100px" }}
                     >
                       <img
                         src={
@@ -216,7 +224,6 @@ export default function Drinks() {
           </div>
         </div>
       </div>
-
       <AddOrUpdateDrinkModal
         show={addDrink || !!modifyDrink}
         drink={modifyDrink}
@@ -224,10 +231,6 @@ export default function Drinks() {
           switch (type) {
             case "add":
               setDrinks((prevDrinks) => [drink, ...prevDrinks]);
-              appDispatch({
-                type: "VENUE:ADD_OR_UPDATE",
-                payload: { drink },
-              });
               break;
             case "update":
               setDrinks((prevDrinks) =>
@@ -236,19 +239,11 @@ export default function Drinks() {
                   return d;
                 })
               );
-              appDispatch({
-                type: "VENUE:ADD_OR_UPDATE",
-                payload: { drink },
-              });
               break;
             case "delete":
               setDrinks((prevDrinks) =>
                 prevDrinks.filter((d) => d._id !== modifyDrink._id)
               );
-              appDispatch({
-                type: "VENUE:DELETE",
-                payload: { drink: modifyDrink },
-              });
               break;
             default:
               break;
@@ -262,7 +257,7 @@ export default function Drinks() {
           setModifyDrink(null);
         }}
       />
-    </div>
+    </>
   );
 }
 
@@ -279,9 +274,12 @@ function AddOrUpdateDrinkModal({ drink, show, onHide, onSuccess }) {
   const [availableCategories, setAvailableCategories] = useState([]);
   const [isFetching, setIsFetching] = useState(false);
 
+  const match = useRouteMatch("/dashboard/menus/:menu_id/drinks");
+  const menu_id = match.params.menu_id;
+
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_API_ENDPOINT}/drink/categories`)
+      .get(`${REACT_APP_API_ENDPOINT}/drink/categories`)
       .then((response) => {
         setAvailableCategories(response.data);
       })
@@ -291,7 +289,11 @@ function AddOrUpdateDrinkModal({ drink, show, onHide, onSuccess }) {
   }, []);
 
   // App State
-  const { appState } = useContext(AppStore);
+  const {
+    appState: {
+      user: { access_token },
+    },
+  } = useContext(AppStore);
 
   // Update state on Props changes
   useEffect(() => {
@@ -312,29 +314,29 @@ function AddOrUpdateDrinkModal({ drink, show, onHide, onSuccess }) {
       case "add":
         // Add Request
         request = axios.post(
-          `${process.env.REACT_APP_API_ENDPOINT}/venue/drink`,
+          `${REACT_APP_API_ENDPOINT}/venue/drink/${menu_id}`,
           { category, name, image, ispopular, sizes, instock },
           {
-            headers: { authorization: `Bearer ${appState.user.access_token}` },
+            headers: { authorization: `Bearer ${access_token}` },
           }
         );
         break;
       case "update":
         // Patch Request
         request = axios.patch(
-          `${process.env.REACT_APP_API_ENDPOINT}/venue/drink/${drink._id}`,
+          `${REACT_APP_API_ENDPOINT}/venue/drink/${drink._id}`,
           { category, name, image, ispopular, sizes, instock },
           {
-            headers: { authorization: `Bearer ${appState.user.access_token}` },
+            headers: { authorization: `Bearer ${access_token}` },
           }
         );
         break;
       case "delete":
         // Delete Request
         request = axios.delete(
-          `${process.env.REACT_APP_API_ENDPOINT}/venue/drink/${drink._id}`,
+          `${REACT_APP_API_ENDPOINT}/venue/drink/${drink._id}`,
           {
-            headers: { authorization: `Bearer ${appState.user.access_token}` },
+            headers: { authorization: `Bearer ${access_token}` },
           }
         );
         break;
@@ -384,8 +386,8 @@ function AddOrUpdateDrinkModal({ drink, show, onHide, onSuccess }) {
 
       <Modal.Body>
         {!category &&
-          availableCategories.map((value) => (
-            <>
+          availableCategories.map((value, k) => (
+            <React.Fragment key={k}>
               <div
                 className="d-flex text-muted my-2"
                 style={{ cursor: "pointer" }}
@@ -394,7 +396,7 @@ function AddOrUpdateDrinkModal({ drink, show, onHide, onSuccess }) {
                 <div className="w-100">{value}</div>
                 <div>&#x3E;</div>
               </div>
-            </>
+            </React.Fragment>
           ))}
         {category && (
           <form>
@@ -433,7 +435,6 @@ function AddOrUpdateDrinkModal({ drink, show, onHide, onSuccess }) {
 
             <SizeSelector
               initialSizes={drink?.sizes || []}
-              category={category}
               onChange={(sizes) => setSizes(sizes)}
             />
             <div className="my-4">
@@ -463,7 +464,7 @@ function AddOrUpdateDrinkModal({ drink, show, onHide, onSuccess }) {
       </Modal.Body>
 
       <Modal.Footer>
-        {drink && (
+        {drink ? (
           <>
             <button
               type="button"
@@ -482,8 +483,7 @@ function AddOrUpdateDrinkModal({ drink, show, onHide, onSuccess }) {
               Update Drink
             </button>
           </>
-        )}
-        {!drink && (
+        ) : (
           <button
             type="button"
             className="btn btn-primary btn-block"
@@ -499,14 +499,14 @@ function AddOrUpdateDrinkModal({ drink, show, onHide, onSuccess }) {
 }
 
 AddOrUpdateDrinkModal.defaultProps = {
-  drink: PropTypes.shape({
+  drink: {
     _id: 1,
     category: "Shots",
     name: "Default Name",
     ispopular: false,
     instock: false,
     sizes: [],
-  }),
+  },
   show: false,
   onSuccess: (i) => i,
   onHide: (i) => i,
@@ -515,7 +515,6 @@ AddOrUpdateDrinkModal.defaultProps = {
 AddOrUpdateDrinkModal.propTypes = {
   drink: PropTypes.shape({
     _id: PropTypes.string,
-    search: "",
     category: PropTypes.string,
     name: PropTypes.string,
     ispopular: PropTypes.string,
@@ -532,119 +531,79 @@ AddOrUpdateDrinkModal.propTypes = {
   onHide: PropTypes.func,
 };
 
-function SizeSelector({ initialSizes, onChange, category }) {
+function SizeSelector({ initialSizes, onChange }) {
   const [sizes, setSizes] = useState(initialSizes);
-
-  // Size Options
-  const sizeOptions = {
-    Spirits: ["Single", "Double", "Triple", "Bottle"],
-    Cocktails: ["Standard", "Large", "Pitcher", "Jug"],
-    Wines: [
-      "Bottle",
-      "125ml Glass",
-      "175ml Glass",
-      "250ml Glass",
-      "500ml Bottle",
-      "750ml Bottle",
-      "1L Bottle",
-    ],
-    "Soft Drinks": ["Can", "Standard", "Large", "Bottle"],
-    "Beers & Bottles": [
-      "Pint",
-      "Half-Pint",
-      "330ml Bottle",
-      "500ml Bottle",
-      "275ml Bottle",
-      "470ml Bottle",
-      "550ml Bottle",
-      "640ml Bottle",
-      "355ml Bottle",
-    ],
-    Shots: ["Single", "Double", "Triple", "Bomb"],
-  };
 
   // emit onChange
   useEffect(() => {
     onChange(sizes);
   }, [sizes, onChange]);
 
-  console.log("sizes:", sizes);
-
   return (
     <div className="my-5">
       <label className="form-label font-weight-bold">Sizes</label>
-      {Array(sizes.filter((s) => s.size && s.price).length + 1)
-        .fill()
-        .map((_, i) => (
-          <div className="row" key={i}>
-            <div className="col-5">
-              <select
-                className="form-control mr-2"
-                value={sizes[i]?.size || ""}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setSizes((s) => {
-                    const newS = [...s];
-                    newS[i] = { ...newS[i], size: value };
-                    return newS;
-                  });
-                }}
-                disabled={!category}
-              >
-                <option value="">Size</option>
-                {category in sizeOptions &&
-                  sizeOptions[category].map((s) => (
-                    <option value={s} key={s}>
-                      {s}
-                    </option>
-                  ))}
-              </select>
-            </div>
-            <div className="col-4">
-              <input
-                type="text"
-                className="form-control mx-2"
-                placeholder="Price"
-                value={sizes[i]?.price || ""}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setSizes((s) => {
-                    const newS = [...s];
-                    newS[i] = { ...newS[i], price: value };
-                    return newS;
-                  });
-                }}
-                disabled={!sizes[i]?.size}
-              ></input>
-            </div>
-            <div className="col-3">
+      {[...sizes, { size: "", price: "" }].map(({ size, price }, i) => (
+        <div className="row" key={i}>
+          <div className="col-5">
+            <input
+              type="text"
+              className="form-control mr-2"
+              value={size || ""}
+              placeholder="Size"
+              onChange={(e) => {
+                const value = e.target.value;
+
+                setSizes((s) => {
+                  const newSizes = [...s];
+                  newSizes[i] = { ...newSizes[i], size: value };
+                  return newSizes;
+                });
+              }}
+            />
+          </div>
+          <div className="col-4">
+            <input
+              type="text"
+              className="form-control mx-2"
+              placeholder="Price"
+              value={price || ""}
+              onChange={(e) => {
+                const value = e.target.value;
+
+                setSizes((s) => {
+                  const newSizes = [...s];
+                  newSizes[i] = { ...newSizes[i], price: value };
+                  return newSizes;
+                });
+              }}
+              disabled={!size}
+            />
+          </div>
+          <div className="col-3">
+            {(size || price) && (
               <button
                 type="button"
                 className="btn btn-link btn-sm"
-                style={{
-                  visibility:
-                    sizes[i]?.size && sizes[i]?.price ? "visible" : "hidden",
-                }}
-                onClick={() => {
+                onClick={() =>
                   setSizes((s) => {
-                    const newS = [...s];
-                    newS.splice(i, 1);
-                    return newS;
-                  });
-                }}
+                    const newSizes = [...s];
+                    newSizes.splice(i, 1);
+                    return newSizes;
+                  })
+                }
               >
                 Remove
               </button>
-            </div>
+            )}
           </div>
-        ))}
+        </div>
+      ))}
     </div>
   );
 }
 
 SizeSelector.defaultProps = {
   sizes: [],
-  category: "",
   onChange: (i) => i,
 };
 
@@ -655,6 +614,5 @@ SizeSelector.propTypes = {
       price: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     })
   ),
-  category: PropTypes.string,
   onChange: PropTypes.func,
 };

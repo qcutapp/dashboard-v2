@@ -1,24 +1,38 @@
 import React, { useEffect, useState, useContext } from "react";
+import { useHistory, useRouteMatch } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Modal from "react-bootstrap/Modal";
 
 import { AppStore } from "store";
 
+const { REACT_APP_API_ENDPOINT, PUBLIC_URL } = process.env;
+
 export default function Menu() {
   const [menus, setMenus] = useState([]);
   const [addMenu, setAddMenu] = useState(false);
   const [modifyMenu, setModifyMenu] = useState(null);
+  const [isFetching, setIsFetching] = useState(false);
+
+  const history = useHistory();
+  const match = useRouteMatch();
 
   const {
-    appState: { user },
+    appState: {
+      user: { access_token },
+    },
+    appDispatch,
   } = useContext(AppStore);
+
+  useEffect(() => {
+    appDispatch({ type: "VENUE:UPDATE", payload: { menus } });
+  }, [menus, appDispatch]);
 
   // fetch: menus
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_API_ENDPOINT}/menu`, {
-        headers: { authorization: `Bearer ${user.access_token}` },
+      .get(`${REACT_APP_API_ENDPOINT}/menu`, {
+        headers: { authorization: `Bearer ${access_token}` },
       })
       .then((response) => {
         setMenus(response.data);
@@ -26,15 +40,18 @@ export default function Menu() {
       .catch((err) => {
         toast.error(err.response?.data?.message || err.message);
       });
-  }, [user]);
+  }, [access_token]);
 
+  // handle: activate menu
   const activateMenu = (menuId) => {
+    setIsFetching(true);
+
     axios
       .patch(
-        `${process.env.REACT_APP_API_ENDPOINT}/menu/${menuId}/activate`,
+        `${REACT_APP_API_ENDPOINT}/menu/${menuId}/activate`,
         {},
         {
-          headers: { authorization: `Bearer ${user.access_token}` },
+          headers: { authorization: `Bearer ${access_token}` },
         }
       )
       .then((response) => {
@@ -42,6 +59,32 @@ export default function Menu() {
       })
       .catch((err) => {
         toast.error(err.response?.data?.message || err.message);
+      })
+      .finally(() => {
+        setIsFetching(false);
+      });
+  };
+
+  // handle: copy menu
+  const copyMenu = (menuId) => {
+    setIsFetching(true);
+
+    axios
+      .post(
+        `${REACT_APP_API_ENDPOINT}/menu/${menuId}/copy`,
+        {},
+        {
+          headers: { authorization: `Bearer ${access_token}` },
+        }
+      )
+      .then((response) => {
+        setMenus((prevMenus) => [...prevMenus, response.data]);
+      })
+      .catch((err) => {
+        toast.error(err.response?.data?.message || err.message);
+      })
+      .finally(() => {
+        setIsFetching(false);
       });
   };
 
@@ -58,7 +101,7 @@ export default function Menu() {
           >
             Add Menu
             <img
-              src={process.env.PUBLIC_URL + "/add-icon.png"}
+              src={PUBLIC_URL + "/add-icon.png"}
               alt="Add Menu"
               style={{ marginLeft: "1rem", width: "24px" }}
             />
@@ -80,10 +123,32 @@ export default function Menu() {
                     className="shadow rounded-pill"
                     key={menu._id}
                     style={{ cursor: "pointer" }}
-                    onClick={() => setModifyMenu(menu)}
+                    onClick={() => history.push(`${match.path}/${menu._id}`)}
                   >
                     <td>{menu.name}</td>
                     <td className="text-right">
+                      <button
+                        className="btn btn-link btn-sm"
+                        style={{ marginRight: "2rem" }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setModifyMenu(menu);
+                        }}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="btn btn-link btn-sm"
+                        style={{ marginRight: "2rem" }}
+                        disabled={isFetching}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          copyMenu(menu._id);
+                        }}
+                      >
+                        Copy
+                      </button>
+
                       {menu.active ? (
                         <button
                           type="button"
@@ -102,6 +167,7 @@ export default function Menu() {
                             activateMenu(menu._id);
                           }}
                           style={{ width: "150px" }}
+                          disabled={isFetching}
                         >
                           Make Active
                         </button>
@@ -152,14 +218,17 @@ export default function Menu() {
 }
 
 function AddOrModifyMenu({ show, menu, onHide, onSuccess }) {
-  const [modifiedName, setModifiedName] = useState("");
-  const [modifiedSpecials, setModifiedSpecials] = useState([]);
-  const [modifiedDrinks, setModifiedDrinks] = useState([]);
+  const [name, setName] = useState("");
   const [isFetching, setIsFetching] = useState(false);
-  const { appState } = useContext(AppStore);
+
+  const {
+    appState: {
+      user: { access_token },
+    },
+  } = useContext(AppStore);
 
   useEffect(() => {
-    setModifiedName(menu?.name || "");
+    setName(menu?.name || "");
   }, [menu]);
 
   const submitMenu = (type) => {
@@ -171,39 +240,32 @@ function AddOrModifyMenu({ show, menu, onHide, onSuccess }) {
       case "add":
         // Add Request
         request = axios.post(
-          `${process.env.REACT_APP_API_ENDPOINT}/menu`,
+          `${REACT_APP_API_ENDPOINT}/menu`,
           {
-            name: modifiedName,
-            drinks: modifiedDrinks,
-            specials: modifiedSpecials,
+            name: name,
           },
           {
-            headers: { authorization: `Bearer ${appState.user.access_token}` },
+            headers: { authorization: `Bearer ${access_token}` },
           }
         );
         break;
       case "update":
         // Update Request
         request = axios.patch(
-          `${process.env.REACT_APP_API_ENDPOINT}/menu/${menu._id}`,
+          `${REACT_APP_API_ENDPOINT}/menu/${menu._id}`,
           {
-            name: modifiedName,
-            drinks: modifiedDrinks,
-            specials: modifiedSpecials,
+            name: name,
           },
           {
-            headers: { authorization: `Bearer ${appState.user.access_token}` },
+            headers: { authorization: `Bearer ${access_token}` },
           }
         );
         break;
       case "delete":
         // Delete Request
-        request = axios.delete(
-          `${process.env.REACT_APP_API_ENDPOINT}/menu/${menu._id}`,
-          {
-            headers: { authorization: `Bearer ${appState.user.access_token}` },
-          }
-        );
+        request = axios.delete(`${REACT_APP_API_ENDPOINT}/menu/${menu._id}`, {
+          headers: { authorization: `Bearer ${access_token}` },
+        });
         break;
       default:
         break;
@@ -251,26 +313,8 @@ function AddOrModifyMenu({ show, menu, onHide, onSuccess }) {
               type="text"
               className="form-control"
               placeholder="Menu Name"
-              value={modifiedName}
-              onChange={(e) => setModifiedName(e.target.value)}
-            />
-          </div>
-          <div className="my-4">
-            <label className="font-weight-bold">Specials</label>
-            <SpecialSelector
-              initialSpecials={menu ? menu.specials : []}
-              onChange={(specials) => {
-                setModifiedSpecials(specials);
-              }}
-            />
-          </div>
-          <div className="my-4">
-            <label className="font-weight-bold">Drinks</label>
-            <DrinkSelector
-              initialDrinks={menu?.drinks || []}
-              onChange={(drinks) => {
-                setModifiedDrinks(drinks);
-              }}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
             />
           </div>
         </form>
@@ -304,137 +348,10 @@ function AddOrModifyMenu({ show, menu, onHide, onSuccess }) {
             onClick={() => submitMenu("add")}
             disabled={isFetching}
           >
-            Save Menu
+            Create Menu
           </button>
         )}
       </Modal.Footer>
     </Modal>
   );
-}
-
-function SpecialSelector({ initialSpecials, onChange }) {
-  const [selectedSpecials, setSelectedSpecials] = useState(initialSpecials);
-
-  const {
-    appState: { venue },
-  } = useContext(AppStore);
-
-  useEffect(() => {
-    onChange(selectedSpecials);
-  }, [selectedSpecials, onChange]);
-
-  return [...selectedSpecials, ""].map((specialId, i) => (
-    <div className="row" key={i}>
-      <div className="col-6">
-        <select
-          className="form-control"
-          value={specialId}
-          onChange={(e) => {
-            const value = e.target.value;
-
-            setSelectedSpecials((prevSelectedSpecials) => {
-              const newSelectedSpecials = [...prevSelectedSpecials];
-              newSelectedSpecials[i] = value;
-              return newSelectedSpecials;
-            });
-          }}
-        >
-          <option value="">Select Special</option>
-          {venue.specials.map((venueSpecial, j) => (
-            <option key={j} value={venueSpecial._id}>
-              {venueSpecial.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="col-3 d-flex align-items-center">
-        {specialId && (
-          <>
-            £
-            {venue.specials.some((v) => v._id === specialId)
-              ? venue.specials.find((v) => v._id === specialId).price
-              : 0.0}
-          </>
-        )}
-      </div>
-      <div className="col-3 d-flex align-items-center">
-        {specialId && (
-          <div
-            className="btn btn-link"
-            onClick={(e) => {
-              setSelectedSpecials((prevSelectedSpecials) =>
-                prevSelectedSpecials.filter((_id) => _id !== specialId)
-              );
-            }}
-          >
-            Remove
-          </div>
-        )}
-      </div>
-    </div>
-  ));
-}
-
-function DrinkSelector({ initialDrinks, onChange }) {
-  const [selectedDrinks, setSelectedDrinks] = useState(initialDrinks);
-
-  const {
-    appState: { venue },
-  } = useContext(AppStore);
-
-  useEffect(() => {
-    onChange(selectedDrinks);
-  }, [selectedDrinks, onChange]);
-
-  return [...selectedDrinks, ""].map((drinkId, i) => (
-    <div className="row" key={i}>
-      <div className="col-6">
-        <select
-          className="form-control"
-          value={drinkId}
-          onChange={(e) => {
-            const value = e.target.value;
-
-            setSelectedDrinks((prevSelectedDrinks) => {
-              const newSelectedDrinks = [...prevSelectedDrinks];
-              newSelectedDrinks[i] = value;
-              return newSelectedDrinks;
-            });
-          }}
-        >
-          <option value="">Select Drink</option>
-          {venue.drinks.map((venueDrink, j) => (
-            <option key={j} value={venueDrink._id}>
-              {venueDrink.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="col-3 d-flex align-items-center">
-        {drinkId && (
-          <>
-            £
-            {venue.drinks.some((d) => d._id === drinkId)
-              ? venue.drinks.find((d) => d._id === drinkId).sizes[0]?.price ||
-                0.0
-              : 0.0}
-          </>
-        )}
-      </div>
-      <div className="col-3 d-flex align-items-center justify-content-center">
-        {drinkId && (
-          <div
-            className="btn btn-link"
-            onClick={() =>
-              setSelectedDrinks((prevSelectedDrinks) =>
-                prevSelectedDrinks.filter((_id) => _id !== drinkId)
-              )
-            }
-          >
-            Remove
-          </div>
-        )}
-      </div>
-    </div>
-  ));
 }

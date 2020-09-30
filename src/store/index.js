@@ -33,42 +33,8 @@ const reducer = (state, action) => {
     case "VENUE:SET":
       newState.venue = payload;
       break;
-    case "VENUE:ADD_OR_UPDATE":
-      if (payload.drink) {
-        if (newState.venue.drinks.some((d) => d._id === payload.drink._id)) {
-          newState.venue.drinks = newState.venue.drinks.map((d) => {
-            if (d._id === payload.drink._id) return payload.drink;
-            return d;
-          });
-        } else {
-          newState.venue.drinks.unshift(payload.drink);
-        }
-      }
-      if (payload.special) {
-        if (
-          newState.venue.specials.some((s) => s._id === payload.special._id)
-        ) {
-          newState.venue.specials = newState.venue.specials.map((s) => {
-            if (s._id === payload.special._id) return payload.special;
-            return s;
-          });
-        } else {
-          newState.venue.specials.unshift(payload.special);
-        }
-      }
-      break;
-    case "VENUE:DELETE":
-      if (payload.drink) {
-        newState.venue.drinks = newState.venue.drinks.filter(
-          (d) => d._id !== payload.drink._id
-        );
-      }
-      if (payload.special) {
-        newState.venue.specials = newState.venue.specials.filter(
-          (s) => s._id !== payload.special._id
-        );
-      }
-
+    case "VENUE:UPDATE":
+      newState.venue = { ...newState.venue, ...payload };
       break;
     default:
       break;
