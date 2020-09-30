@@ -11,15 +11,17 @@ import axios from "axios";
 
 import { AppStore } from "store";
 
-import Drinks from "pages/dashboard/drinks";
-import Specials from "pages/dashboard/specials";
-import Menu from "pages/dashboard/menu";
+import Menus from "pages/dashboard/menus/index";
+import Menu from "pages/dashboard/menus/menu";
 import Orders from "pages/dashboard/orders";
+
+const { REACT_APP_API_ENDPOINT } = process.env;
 
 export default function Dashboard() {
   const match = useRouteMatch();
   const [isFetching, setIsFetching] = useState(true);
   const [todaysTakings, setTodaysTakings] = useState(0);
+  const [activeMenu, setActiveMenu] = useState(null);
 
   const {
     appState: { user, venue },
@@ -29,20 +31,18 @@ export default function Dashboard() {
   // Fetch: Venue details
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_API_ENDPOINT}/venue/me`, {
+      .get(`${REACT_APP_API_ENDPOINT}/venue/me`, {
         headers: { authorization: `Bearer ${user.access_token}` },
       })
       .then(async (response) => {
-        // Update appState
         appDispatch({ type: "VENUE:SET", payload: response.data });
 
         // Fetch: Todays Takings
-        return axios
-          .get(`${process.env.REACT_APP_API_ENDPOINT}/venue/takings`, {
+        axios
+          .get(`${REACT_APP_API_ENDPOINT}/venue/takings`, {
             headers: { authorization: `Bearer ${user.access_token}` },
           })
           .then((response) => {
-            // Update todaysTakings
             setTodaysTakings(response.data.sum?.[0]?.total || 0);
           });
       })
@@ -52,7 +52,13 @@ export default function Dashboard() {
       .finally(() => {
         setIsFetching(false);
       });
-  }, [user, appDispatch]);
+  }, [user.access_token, appDispatch]);
+
+  useEffect(() => {
+    if (venue?.menus) {
+      setActiveMenu(venue.menus.find((menu) => menu.active));
+    }
+  }, [venue]);
 
   // Loading
   if (isFetching) return null;
@@ -84,29 +90,23 @@ export default function Dashboard() {
             </div>
           </div>
           <ul className="nav flex-column flex-grow-1">
+            {activeMenu?._id && (
+              <li className="nav-link p-0 my-2">
+                <NavLink
+                  className="btn btn-block text-left text-white-50"
+                  activeClassName="nav-link-active"
+                  to={`${match.url}/menus/${activeMenu._id}`}
+                >
+                  Active Menu
+                </NavLink>
+              </li>
+            )}
             <li className="nav-link p-0 my-2">
               <NavLink
                 className="btn btn-block text-left text-white-50"
                 activeClassName="nav-link-active"
-                to={`${match.url}/drinks`}
-              >
-                Drinks
-              </NavLink>
-            </li>
-            <li className="nav-link p-0 my-2">
-              <NavLink
-                className="btn btn-block text-left text-white-50"
-                activeClassName="nav-link-active"
-                to={`${match.url}/specials`}
-              >
-                Specials
-              </NavLink>
-            </li>
-            <li className="nav-link p-0 my-2">
-              <NavLink
-                className="btn btn-block text-left text-white-50"
-                activeClassName="nav-link-active"
-                to={`${match.url}/menu`}
+                to={`${match.url}/menus`}
+                exact
               >
                 Menus
               </NavLink>
@@ -150,10 +150,13 @@ export default function Dashboard() {
           </ul>
         </div>
         <div className="main col-sm col-md-9 col-lg-10 h-100 px-4">
+          <div className="fetching"></div>
           <Switch>
-            <Route path={`${match.path}/drinks`} component={Drinks}></Route>
-            <Route path={`${match.path}/specials`} component={Specials}></Route>
-            <Route path={`${match.path}/menu`} component={Menu}></Route>
+            <Route exact path={`${match.path}/menus`} component={Menus}></Route>
+            <Route
+              path={`${match.path}/menus/:menu_id`}
+              component={Menu}
+            ></Route>
             <Route path={`${match.path}/orders`} component={Orders}></Route>
             {/* Default */}
             <Route

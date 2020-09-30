@@ -1,10 +1,15 @@
 import React, { useState, useEffect, useContext } from "react";
+import PropTypes from "prop-types";
+import { useRouteMatch } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
 import { toast } from "react-toastify";
 import axios from "axios";
 import UploadFile from "components/UploadFile";
 
 import { AppStore } from "store";
+
+// .env
+const { REACT_APP_API_ENDPOINT, PUBLIC_URL } = process.env;
 
 export default function Specials() {
   const [specials, setSpecials] = useState([]);
@@ -15,15 +20,19 @@ export default function Specials() {
     search: "",
   });
 
+  const match = useRouteMatch("/dashboard/menus/:menu_id/specials");
+  const menu_id = match.params.menu_id;
+
   const {
-    appState: { venue, user },
-    appDispatch,
+    appState: {
+      user: { access_token },
+    },
   } = useContext(AppStore);
 
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_API_ENDPOINT}/venue/special`, {
-        headers: { authorization: `Bearer ${user.access_token}` },
+      .get(`${REACT_APP_API_ENDPOINT}/venue/special/${menu_id}`, {
+        headers: { authorization: `Bearer ${access_token}` },
       })
       .then((response) => {
         setSpecials(response.data);
@@ -31,13 +40,13 @@ export default function Specials() {
       .catch((err) => {
         toast.error(err.response?.data?.message || err.message);
       });
-  }, [venue, user]);
+  }, [menu_id, access_token]);
 
   // Filter specials
   let filteredSpecials = specials.filter((special) => {
     if (!filter.search) return true;
 
-    if (special.name.toLowerCase().includes(filter.search.toLowerCase())) {
+    if (special?.name?.toLowerCase().includes(filter.search.toLowerCase())) {
       return true;
     }
 
@@ -49,18 +58,15 @@ export default function Specials() {
 
   return (
     <div className="container">
-      <div className="row mt-3 mb-5">
-        <div className="col-sm">
-          <h1 className="text-light text-weight-bold">Your Specials</h1>
-        </div>
+      <div className="row">
         <div className="col-sm text-right">
           <div
-            className="btn btn-primary btn-primary-hover-none btn-lg"
+            className="btn btn-primary btn-primary-hover-none btn-lg mb-2"
             onClick={() => setAddSpecial(true)}
           >
             Add Special
             <img
-              src={process.env.PUBLIC_URL + "/add-icon.png"}
+              src={PUBLIC_URL + "/add-icon.png"}
               alt="Add Special"
               style={{ marginLeft: "1rem", width: "24px" }}
             />
@@ -74,7 +80,7 @@ export default function Specials() {
               <thead>
                 <tr>
                   <td colSpan="3" style={{ verticalAlign: "bottom" }}>
-                    {filteredSpecials.length} Items Showing
+                    {filteredSpecials.length} Specials Showing
                     {Object.keys(filter).some((i) => filter[i].length) && (
                       <button
                         type="button"
@@ -133,10 +139,6 @@ export default function Specials() {
           switch (type) {
             case "add":
               setSpecials((prevSpecials) => [special, ...prevSpecials]);
-              appDispatch({
-                type: "VENUE:ADD_OR_UPDATE",
-                payload: { special },
-              });
               break;
             case "update":
               setSpecials((prevSpecials) =>
@@ -145,19 +147,11 @@ export default function Specials() {
                   return s;
                 })
               );
-              appDispatch({
-                type: "VENUE:ADD_OR_UPDATE",
-                payload: { special },
-              });
               break;
             case "delete":
               setSpecials((prevSpecials) =>
                 prevSpecials.filter((s) => s._id !== modifySpecial._id)
               );
-              appDispatch({
-                type: "VENUE:DELETE",
-                payload: { special: modifySpecial },
-              });
               break;
             default:
               break;
@@ -183,8 +177,16 @@ function AddOrUpdateSpecial({ show, special, onSuccess, onHide }) {
   const [optionsQuantity, setOptionsQuantity] = useState("");
   const [options, setOptions] = useState([]);
   const [description, setDescription] = useState("");
-  const { appState } = useContext(AppStore);
   const [isFetching, setIsFetching] = useState(false);
+
+  const match = useRouteMatch("/dashboard/menus/:menu_id/specials");
+  const menu_id = match.params.menu_id;
+
+  const {
+    appState: {
+      user: { access_token },
+    },
+  } = useContext(AppStore);
 
   useEffect(() => {
     setName(special?.name || "");
@@ -205,29 +207,29 @@ function AddOrUpdateSpecial({ show, special, onSuccess, onHide }) {
       case "add":
         // Add Request
         request = axios.post(
-          `${process.env.REACT_APP_API_ENDPOINT}/venue/special`,
+          `${REACT_APP_API_ENDPOINT}/venue/special/${menu_id}`,
           { name, type, price, image, optionsQuantity, options, description },
           {
-            headers: { authorization: `Bearer ${appState.user.access_token}` },
+            headers: { authorization: `Bearer ${access_token}` },
           }
         );
         break;
       case "update":
         // Update Request
         request = axios.patch(
-          `${process.env.REACT_APP_API_ENDPOINT}/venue/special/${special._id}`,
+          `${REACT_APP_API_ENDPOINT}/venue/special/${special._id}`,
           { name, type, price, image, optionsQuantity, options, description },
           {
-            headers: { authorization: `Bearer ${appState.user.access_token}` },
+            headers: { authorization: `Bearer ${access_token}` },
           }
         );
         break;
       case "delete":
         // Delete Request
         request = axios.delete(
-          `${process.env.REACT_APP_API_ENDPOINT}/venue/special/${special._id}`,
+          `${REACT_APP_API_ENDPOINT}/venue/special/${special._id}`,
           {
-            headers: { authorization: `Bearer ${appState.user.access_token}` },
+            headers: { authorization: `Bearer ${access_token}` },
           }
         );
         break;
@@ -354,7 +356,7 @@ function AddOrUpdateSpecial({ show, special, onSuccess, onHide }) {
         </form>
       </Modal.Body>
       <Modal.Footer>
-        {special && (
+        {special ? (
           <>
             <button
               type="button"
@@ -373,8 +375,7 @@ function AddOrUpdateSpecial({ show, special, onSuccess, onHide }) {
               Update Special
             </button>
           </>
-        )}
-        {!special && (
+        ) : (
           <button
             type="button"
             className="btn btn-primary btn-block"
@@ -389,16 +390,68 @@ function AddOrUpdateSpecial({ show, special, onSuccess, onHide }) {
   );
 }
 
+AddOrUpdateSpecial.defaultProps = {
+  drink: {
+    _id: 1,
+    name: "Default Name",
+    type: "set",
+    price: 10,
+    image: "https://picsum.photos/200.jpg",
+    optionsQuantity: 0,
+    options: [],
+    description: "Default Description",
+  },
+  show: false,
+  onSuccess: (i) => i,
+  onHide: (i) => i,
+};
+
+AddOrUpdateSpecial.propTypes = {
+  special: PropTypes.shape({
+    _id: PropTypes.string,
+    name: PropTypes.string,
+    type: PropTypes.oneOf(["set", "option"]),
+    price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    image: PropTypes.string,
+    optionsQuantity: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    options: PropTypes.arrayOf(PropTypes.string),
+    description: PropTypes.string,
+  }),
+  show: PropTypes.bool.isRequired,
+  onSuccess: PropTypes.func,
+  onHide: PropTypes.func,
+};
+
 function OptionsSelector({ initialOptions, onChange }) {
   const [selectedOptions, setSelectedOptions] = useState(initialOptions);
+  const [availableDrinks, setAvailableDrinks] = useState([]);
+
+  const match = useRouteMatch("/dashboard/menus/:menu_id/specials");
+  const menu_id = match.params.menu_id;
+
+  const {
+    appState: {
+      user: { access_token },
+    },
+  } = useContext(AppStore);
 
   useEffect(() => {
     onChange(selectedOptions);
   }, [selectedOptions, onChange]);
 
-  const {
-    appState: { venue },
-  } = useContext(AppStore);
+  useEffect(() => {
+    // Get drinks
+    axios
+      .get(`${REACT_APP_API_ENDPOINT}/venue/drink/${menu_id}`, {
+        headers: { authorization: `Bearer ${access_token}` },
+      })
+      .then((response) => {
+        setAvailableDrinks(response.data);
+      })
+      .catch((err) => {
+        toast.error(err.response?.data?.message || err.message);
+      });
+  }, [menu_id, access_token]);
 
   return [...selectedOptions, ""].map((drinkId, i) => (
     <div className="row" key={i}>
@@ -418,9 +471,9 @@ function OptionsSelector({ initialOptions, onChange }) {
           }}
         >
           <option value="">Select Drink</option>
-          {venue.drinks.map((venueDrink, j) => (
-            <option key={j} value={venueDrink._id}>
-              {venueDrink.name}
+          {availableDrinks.map((menuDrink, j) => (
+            <option key={j} value={menuDrink._id}>
+              {menuDrink.name}
             </option>
           ))}
         </select>
@@ -428,11 +481,13 @@ function OptionsSelector({ initialOptions, onChange }) {
       <div className="col-4 d-flex align-items-end">
         {drinkId && (
           <div
-            className="btn btn-link"
+            className="btn btn-link btn-sm"
             onClick={() =>
-              setSelectedOptions((prevSelectedOptions) =>
-                prevSelectedOptions.filter((_id) => _id !== drinkId)
-              )
+              setSelectedOptions((o) => {
+                const newOptions = [...o];
+                newOptions.splice(i, 1);
+                return newOptions;
+              })
             }
           >
             Remove
@@ -442,3 +497,13 @@ function OptionsSelector({ initialOptions, onChange }) {
     </div>
   ));
 }
+
+OptionsSelector.defaultProps = {
+  initialOptions: [],
+  onChange: (i) => i,
+};
+
+OptionsSelector.propTypes = {
+  initialOptions: PropTypes.arrayOf(PropTypes.string),
+  onChange: PropTypes.func,
+};

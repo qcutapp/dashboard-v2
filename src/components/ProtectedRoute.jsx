@@ -1,4 +1,5 @@
 import React, { useContext } from "react";
+import PropTypes from "prop-types";
 import { Route, Redirect } from "react-router-dom";
 
 import { AppStore } from "store";
@@ -16,3 +17,13 @@ export default function ProtectedRoute(props) {
 
   return <Route {...props} />;
 }
+
+ProtectedRoute.defaultProps = {
+  requiredRole: "public",
+  redirect: "/",
+};
+
+ProtectedRoute.propTypes = {
+  requiredRole: PropTypes.oneOf(["public", "user"]),
+  redirect: PropTypes.string,
+};

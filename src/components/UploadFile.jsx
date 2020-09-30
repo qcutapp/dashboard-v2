@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import PropTypes from "prop-types";
 import { toast } from "react-toastify";
 import * as firebase from "firebase/app";
 import "firebase/storage";
@@ -78,9 +79,11 @@ export default function UploadFile({ initialUrl, onUpload }) {
             style={{ backgroundImage: `url(${uploadUrl})` }}
           ></div>
           <div
-            className="btn btn-link"
+            className="btn btn-link btn-sm"
+            style={{ padding: 0 }}
             onClick={(e) => {
               setUploadUrl(null);
+              onUpload(null);
             }}
           >
             Remove
@@ -90,3 +93,13 @@ export default function UploadFile({ initialUrl, onUpload }) {
     </div>
   );
 }
+
+UploadFile.defaultProps = {
+  initialUrl: "https://picsum.photos/200.jpg",
+  onUpload: (i) => i,
+};
+
+UploadFile.propTypes = {
+  initialUrl: PropTypes.string,
+  onUpload: PropTypes.func,
+};
