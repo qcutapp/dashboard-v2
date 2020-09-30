@@ -193,8 +193,8 @@ export default function Drinks() {
                     onClick={() => setModifyDrink(drink)}
                   >
                     <td
-                      className="p-4 right-divider"
-                      style={{ width: "125px" }}
+                      className="p-4 text-center right-divider"
+                      style={{ width: "100px" }}
                     >
                       <img
                         src={

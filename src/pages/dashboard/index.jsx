@@ -90,17 +90,19 @@ export default function Dashboard() {
             </div>
           </div>
           <ul className="nav flex-column flex-grow-1">
-            {activeMenu?._id && (
-              <li className="nav-link p-0 my-2">
-                <NavLink
-                  className="btn btn-block text-left text-white-50"
-                  activeClassName="nav-link-active"
-                  to={`${match.url}/menus/${activeMenu._id}`}
-                >
-                  Active Menu
-                </NavLink>
-              </li>
-            )}
+            <li className="nav-link p-0 my-2">
+              <NavLink
+                className="btn btn-block text-left text-white-50"
+                activeClassName="nav-link-active"
+                to={
+                  activeMenu?._id
+                    ? `${match.url}/menus/${activeMenu._id}`
+                    : `${match.url}/menus`
+                }
+              >
+                Active Menu
+              </NavLink>
+            </li>
             <li className="nav-link p-0 my-2">
               <NavLink
                 className="btn btn-block text-left text-white-50"

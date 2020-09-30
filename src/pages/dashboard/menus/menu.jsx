@@ -75,14 +75,14 @@ export default function Menu() {
             style={{ borderRadius: "2rem" }}
           >
             <NavLink
-              className="btn btn-light"
+              className="btn btn-light box-shadow-0"
               style={{ borderRadius: "2rem" }}
               to={`${match.url}/drinks`}
             >
               Drinks
             </NavLink>
             <NavLink
-              className="btn btn-light"
+              className="btn btn-light box-shadow-0"
               style={{ borderRadius: "2rem" }}
               to={`${match.url}/specials`}
             >

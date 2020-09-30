@@ -141,7 +141,7 @@ table.cards {
       position: absolute;
       display: block;
       top: 25%;
-      right: 25px;
+      right: 0;
       height: 50%;
       width: $border-width;
       background-color: $gray-400;
@@ -181,6 +181,10 @@ table.cards {
 
 .shadow {
   box-shadow: 0 0rem 0.8rem 0.2rem rgba(0, 0, 0, 0.1) !important;
+}
+
+.box-shadow-0 {
+  box-shadow: none !important;
 }
 
 .list-plus > li:before {
