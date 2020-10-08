@@ -1,5 +1,7 @@
 {
     "cSpell.words": [
+        "Alcopops",
+        "Liquers",
         "borderless",
         "browserslist",
         "daterangepicker",
@@ -10,8 +12,8 @@
         "unstyled"
     ],
     "workbench.colorCustomizations": {
-        "activityBar.background": "#283107",
-        "titleBar.activeBackground": "#38450A",
-        "titleBar.activeForeground": "#F8FCE9"
+        // "activityBar.background": "#283107",
+        // "titleBar.activeBackground": "#38450A",
+        // "titleBar.activeForeground": "#F8FCE9"
     }
 }

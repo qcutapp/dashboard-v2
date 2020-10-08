@@ -7,14 +7,15 @@ const AppStore = createContext();
 
 const reducer = (state, action) => {
   const newState = { ...state };
+  const { type, payload } = action;
 
   // Actions
-  switch (action.type) {
+  switch (type) {
     case "USER:SET":
       // Set cookie
-      Cookies.set("token", action.payload.access_token);
+      Cookies.set("token", payload.access_token);
 
-      newState.user = action.payload;
+      newState.user = payload;
 
       // Welcome
       toast.success(`Welcome ${newState.user.name}!`);
@@ -30,7 +31,10 @@ const reducer = (state, action) => {
       toast.success(`You've been logged out!`);
       break;
     case "VENUE:SET":
-      newState.venue = action.payload;
+      newState.venue = payload;
+      break;
+    case "VENUE:UPDATE":
+      newState.venue = { ...newState.venue, ...payload };
       break;
     default:
       break;
