@@ -69,6 +69,12 @@ export default function Dashboard() {
       <div>
         Your account does not belong to any venue. Please contact the
         administrator.
+        <div
+          className="btn btn-link"
+          onClick={() => appDispatch({ type: "USER:UNSET" })}
+        >
+          Go Back!
+        </div>
       </div>
     );
   }
